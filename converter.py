@@ -1,4 +1,5 @@
 import os
+import sys
 import ffmpeg
 from kivy.app import App  # чтобы все писать не с нуля
 from kivy.uix.boxlayout import BoxLayout  # единственный который я помню как работает
@@ -6,7 +7,6 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.dropdown import DropDown
-from kivy.core.image import Image
 from kivy.core.window import Window
 import subprocess
 from pathlib import Path
@@ -45,21 +45,52 @@ from pathlib import Path
 #         self.val += int(instance.text[1:])
 
 #Color palette (0.0 - 1.0)
-cpallete = {"Black": (18/255,17/255,19/255,1),
+
+
+pallete_dark = {"Black": (18/255,17/255,19/255,1),
             "Dark": (34/255,29/255,37/255,1),
             "Main": (137/255,152/255,120/255,1),
             "Highlight": (228/255,230/255,195/255,1),
             "White": (247/255,247/255,242/255,1)}
 
+pallete_darkblue = {"Black": (18/255,17/255,19/255,1),
+            "Dark": (34/255,29/255,37/255,1),
+            "Main": (137/255,152/255,120/255,1),
+            "Highlight": (228/255,230/255,195/255,1),
+            "White": (247/255,247/255,242/255,1)}
 
+pallete_white = {"Black": (18/255,17/255,19/255,1),
+            "Dark": (34/255,29/255,37/255,1),
+            "Main": (255/255,255/255,255/255,1),
+            "Highlight": (228/255,230/255,195/255,1),
+            "White": (247/255,247/255,242/255,1)}
 
+pallete_whiteblue = {"Black": (18/255,17/255,19/255,1),
+            "Dark": (34/255,29/255,37/255,1),
+            "Main": (137/255,152/255,120/255,1),
+            "Highlight": (228/255,230/255,195/255,1),
+            "White": (247/255,247/255,242/255,1)}
+
+pallete_green = {"Black": (18/255,17/255,19/255,1),
+            "Dark": (34/255,29/255,37/255,1),
+            "Main": (137/255,152/255,120/255,1),
+            "Highlight": (228/255,230/255,195/255,1),
+            "White": (247/255,247/255,242/255,1)}
+
+pallete_pink = {"Black": (96/255,36/255,55/255,1),
+            "Dark": (138/255,40/255,70/255,1),
+            "Main": (224/255,122/255,162/255,1),
+            "Highlight": (225/255,194/255,212/255,1),
+            "White": (225/255,224/255,233/255,1)}
+
+mainpallete = pallete_green
 
 script_path = os.path.abspath(__file__)
 ffmpeg_folder = r"ffmpeg\bin\ffmpeg.exe"
 ffprobe_folder = r"ffmpeg\bin\ffprobe.exe"
 ffmpeg_path= script_path.replace("converter.py","")+ffmpeg_folder
 ffprobe_path= script_path.replace("converter.py","")+ffprobe_folder
-file = r"D:\Клипы\НАПЕРДЫШ.mp4"
+file = sys.argv[1]
 abs_file = Path(file)
 file_types = {
     'image': ("jpg", "jpeg", "png", "bmp", "gif", "webp"),
@@ -68,25 +99,26 @@ file_types = {
 }
 
 buttons_design = {
-    'background_color': cpallete["Main"], 
-    'outline_color': cpallete["Highlight"],
-    'color': cpallete["Highlight"]
+    'background_color': mainpallete["Main"],
+    # 'background_normal': '',
+    'color': mainpallete["Highlight"],
     # 'border_width': 2,
     # 'outline_color': (1,1,1,1)
 } #НАААЙС РАБОТАЕТ <<< а хули оно работаект тоак нвые длобавть? ало ало хуем по лбу не дало??????????????????? ????<<<?????? я сделал
 label_design = {
-    'color': cpallete["White"],
+    'color': mainpallete["White"],
     # 'border_width': 2,
     # 'outline_color': (1,1,1,1)
 }
 edit_box_design = {
-    'background_color': cpallete["Dark"], 
-    'foreground_color': cpallete["White"],
+    'background_color': mainpallete["Dark"], 
+    'foreground_color': mainpallete["White"],
+    'font_name': "misc/InterTight-Medium.ttf"
     # 'outline_width': 2,
     # 'outline_color': (1,1,1,1)
 }
 
-Window.clearcolor = cpallete["Black"]
+Window.clearcolor = mainpallete["Black"]
 
 class WRecode(App):
     def build(self):
@@ -114,7 +146,13 @@ class WRecode(App):
         self.map.append([file_layout])
 
         choices = []
-        if file.split('.')[-1] in file_types['image']:
+
+        if " " in file:
+            self.parameters = []
+            choices = [Label(text='Try renaming the file so that the name\ndoes not contain spaces or special symbols', font_name="misc\InterTight-SemiBold.ttf", font_size=17)]
+            labels = [Label(text='')]
+            
+        elif file.split('.')[-1] in file_types['image']:
             self.parameters = [TextInput(**edit_box_design) for _ in range(3)]
             choices = [
                 Button(text='Convert', on_press=lambda *args: self.convert_image(self, 0), size_hint = (2,1), font_name="misc\InterTight-Black.ttf", font_size=42, **buttons_design),
@@ -132,10 +170,10 @@ class WRecode(App):
             choices = [
                 Button(text='Convert', on_press=lambda *args: self.convert_video(self, 0), size_hint = (2,1), font_name="misc\InterTight-Black.ttf", font_size=42, **buttons_design), # FFFF 424242 4242424242244242424242424242424242424242424242424242 оставляем похуй
                 Button(text='Change bitrate', on_press=lambda *args: self.change_bitrate(self, 1), size_hint = (2,1), font_name="misc\InterTight-Black.ttf", font_size=42, **buttons_design),
-                Button(text='Change audiotrack bitrate', on_press=lambda *args: self.change_audio_bitrate_in_video(self, 2), size_hint = (2,1), font_name="misc\InterTight-Bold.ttf", font_size=30, **buttons_design),
+                Button(text='Change audiotrack bitrate', on_press=lambda *args: self.change_audio_bitrate_in_video(self, 2), size_hint = (2,1), font_name="misc\InterTight-Black.ttf", font_size=30, **buttons_design),
                 Button(text='Compress by size', on_press=lambda *args: self.compress_video_by_size(self, 3), size_hint = (2,1), font_name="misc\InterTight-Black.ttf", font_size=42, **buttons_design),
-                Button(text='Change FPS', on_press=lambda *args: self.change_fps(self, 4), size_hint = (2,1), font_name="misc\InterTight-Bold.ttf", font_size=42, **buttons_design),
-                Button(text='Resize', on_press=lambda *args: self.resize_video(self, 5), size_hint = (2,1), font_name="misc\InterTight-Bold.ttf", font_size=42, **buttons_design),
+                Button(text='Change FPS', on_press=lambda *args: self.change_fps(self, 4), size_hint = (2,1), font_name="misc\InterTight-Black.ttf", font_size=42, **buttons_design),
+                Button(text='Resize', on_press=lambda *args: self.resize_video(self, 5), size_hint = (2,1), font_name="misc\InterTight-Black.ttf", font_size=42, **buttons_design),
                 Button(text='Extract audio', on_press=self.extract_audio, size_hint=(3,1), font_name="misc\InterTight-Black.ttf", font_size=42, **buttons_design)
             ]
             labels = [
@@ -161,6 +199,8 @@ class WRecode(App):
             ]
         else:
             self.parameters = []
+            choices = [Label(text='File not supported', font_name="misc\InterTight-SemiBold.ttf", font_size=17)]
+            labels = [Label(text='')]
 
         # for i in labels:
         #     with i.canvas:
