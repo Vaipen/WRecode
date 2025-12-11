@@ -5,11 +5,11 @@ Adds ffmpeg conversion to the context menu for easy and fast media file conversi
 How to use:
 Make sure you have installed [python](https://www.python.org/downloads/windows) or from Microsoft Store https://apps.microsoft.com/detail/9pnrbtzxmb4z?hl=en-US&gl=US
 
-## 1. run install kivy.py (UI library)
+## 1. run **install kivy.py** (UI library)
 ...
 
 
-## 2. run install.py
+## 2. run **install.py**
 ...
 
 
@@ -18,5 +18,7 @@ Make sure you have installed [python](https://www.python.org/downloads/windows) 
 
 
 Enjoy!
+
+if you move WRecode folder, reinstall app with **uninstall.py**, and **install.py** again from new folder
 
 If you have any problems, please write a problem in the [Issues](https://github.com/Vaipen/WRecode/issues).
