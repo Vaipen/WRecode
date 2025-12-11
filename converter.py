@@ -90,7 +90,8 @@ ffmpeg_folder = r"ffmpeg\bin\ffmpeg.exe"
 ffprobe_folder = r"ffmpeg\bin\ffprobe.exe"
 ffmpeg_path= script_path.replace("converter.py","")+ffmpeg_folder
 ffprobe_path= script_path.replace("converter.py","")+ffprobe_folder
-file = sys.argv[1]
+# file = sys.argv[1]
+file = r"E:\file.mp4"
 abs_file = Path(file)
 file_types = {
     'image': ("jpg", "jpeg", "png", "bmp", "gif", "webp"),
