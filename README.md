@@ -26,7 +26,7 @@ Enjoy!
 > If you move WRecode folder, reinstall app with **uninstall.py**, and **install.py** again from new folder
 > 
 > Make sure your user name not contain space, if it is, you may start WRecode convert.bat file manually.
-> Copy file from C:\Users\_user_\AppData\Roaming\Microsoft\Windows\SendTo\WRecode convert.bat.
+> Copy file from C:\Users\user\AppData\Roaming\Microsoft\Windows\SendTo\WRecode convert.bat.
 > Drag&drop media on it and it works
 
 
