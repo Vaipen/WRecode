@@ -1,17 +1,17 @@
-# WRecode (ffmpeg)   IN DEVELOPMENT!!!
+# WRecode converter
 
-Adds ffmpeg conversion to the context menu for easy and fast media file conversion.
+Adds ffmpeg conversion with GUI to the context menu for easy and fast media file conversion.
 
 ## How to use:
 Make sure you have installed [python](https://www.python.org/downloads/windows) or from Microsoft Store https://apps.microsoft.com/detail/9pnrbtzxmb4z?hl=en-US&gl=US
 
 ## 1. run **install kivy.py** (UI library)
-<img width="512" height="136" alt="image" src="https://github.com/user-attachments/assets/9eb2de86-53d7-44bf-b55a-96c243f49cff" />
+<img width="341" height="90" alt="image" src="https://github.com/user-attachments/assets/9eb2de86-53d7-44bf-b55a-96c243f49cff" />
 
 
 
 ## 2. run **install.py**
-<img width="424" height="124" alt="image" src="https://github.com/user-attachments/assets/61cac48b-f5ee-4a43-ac3f-6fcdf6e8cf30" />
+<img width="282" height="82" alt="image" src="https://github.com/user-attachments/assets/61cac48b-f5ee-4a43-ac3f-6fcdf6e8cf30" />
 
 
 
