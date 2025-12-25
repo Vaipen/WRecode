@@ -1,0 +1,140 @@
+[gd_scene load_steps=7 format=3 uid="uid://78e6lxx8puvw"]
+
+[ext_resource type="Theme" uid="uid://c7t12d7i2lh4c" path="res://theme.tres" id="1_ig7tw"]
+[ext_resource type="Texture2D" uid="uid://f8lbxtfml1ki" path="res://ui/icons/autorenew_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="2_lquwl"]
+[ext_resource type="Texture2D" uid="uid://c1cuu1ujil3cn" path="res://ui/icons/photo_size_select_small_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="3_7mycd"]
+[ext_resource type="Texture2D" uid="uid://ds1on1jex6b2t" path="res://ui/icons/speed_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="4_272bh"]
+[ext_resource type="Texture2D" uid="uid://b0pe3t8eyp1m0" path="res://ui/icons/replace_audio_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="5_5vw27"]
+[ext_resource type="Texture2D" uid="uid://e03h7m8yt8r3" path="res://ui/icons/settings_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="6_7mycd"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_ig7tw")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+text = "Input file:"
+
+[node name="LineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="VideoFuncs" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Convert" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VideoFuncs"]
+layout_mode = 2
+
+[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Convert"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Convert"
+icon = ExtResource("2_lquwl")
+
+[node name="Option" type="OptionButton" parent="MarginContainer/VBoxContainer/VideoFuncs/Convert"]
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 1
+popup/item_0/id = 0
+
+[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Convert"]
+layout_mode = 2
+text = "?"
+
+[node name="Compress" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VideoFuncs"]
+layout_mode = 2
+
+[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Compress"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Compress"
+icon = ExtResource("3_7mycd")
+
+[node name="Option" type="OptionButton" parent="MarginContainer/VBoxContainer/VideoFuncs/Compress"]
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 1
+popup/item_0/id = 0
+
+[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Compress"]
+layout_mode = 2
+text = "?"
+
+[node name="Edit FPS" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VideoFuncs"]
+layout_mode = 2
+
+[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Edit FPS"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Edit FPS"
+icon = ExtResource("4_272bh")
+
+[node name="Option" type="OptionButton" parent="MarginContainer/VBoxContainer/VideoFuncs/Edit FPS"]
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 1
+popup/item_0/id = 0
+
+[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Edit FPS"]
+layout_mode = 2
+text = "?"
+
+[node name="Extract Audio" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VideoFuncs"]
+layout_mode = 2
+
+[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Extract Audio"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Extract audio"
+icon = ExtResource("5_5vw27")
+
+[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Extract Audio"]
+layout_mode = 2
+text = "?"
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Bottom" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="AdvancedMode" type="Button" parent="MarginContainer/VBoxContainer/Bottom"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Advanced mode"
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 16
+text = "WRecode"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="Settings" type="Button" parent="MarginContainer/VBoxContainer/Bottom"]
+layout_mode = 2
+icon = ExtResource("6_7mycd")

@@ -11,8 +11,23 @@ config_version=5
 [application]
 
 config/name="WRecode"
+config/description="Adds ffmpeg conversion to the context menu for easy and fast media file conversion."
+config/version="0.1"
+run/main_scene="uid://78e6lxx8puvw"
 config/features=PackedStringArray("4.4", "GL Compatibility")
+run/delta_smoothing=false
+boot_splash/show_image=false
+boot_splash/fullsize=false
+boot_splash/use_filter=false
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=800
+window/size/viewport_height=600
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/vsync/vsync_mode=0
 
 [rendering]
 
