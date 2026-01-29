@@ -18,4 +18,4 @@ expand_margin_right = 3.0
 expand_margin_bottom = 3.0
 shadow_color = Color(0, 0, 0, 0.11372549)
 shadow_size = 30
-shadow_offset = Vector2(0, 17.46)
+shadow_offset = Vector2(0, 18)

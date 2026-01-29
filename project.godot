@@ -8,16 +8,20 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="WRecode"
 config/description="Adds ffmpeg conversion with convinient UI to the context menu for easy and fast media file conversion."
 config/version="0.1.0"
 run/main_scene="uid://78e6lxx8puvw"
-config/features=PackedStringArray("4.5", "GL Compatibility")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 run/delta_smoothing=false
 boot_splash/show_image=false
-boot_splash/fullsize=false
+boot_splash/stretch_mode=0
 boot_splash/use_filter=false
 config/icon="res://icon.svg"
 
@@ -33,7 +37,7 @@ window/vsync/vsync_mode=0
 
 [editor]
 
-run/main_run_args="\"E:/vid.mp4\""
+run/main_run_args="\"E:\\Для перекода\\THE FINALS - 2026-01-23 23-14-41.mp4\""
 
 [rendering]
 

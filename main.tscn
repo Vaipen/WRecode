@@ -1,6 +1,6 @@
-[gd_scene load_steps=9 format=3 uid="uid://78e6lxx8puvw"]
+[gd_scene format=3 uid="uid://78e6lxx8puvw"]
 
-[ext_resource type="Theme" uid="uid://c7t12d7i2lh4c" path="res://theme.tres" id="1_ig7tw"]
+[ext_resource type="Theme" uid="uid://bp7665k4n8m6y" path="res://Theme.tres" id="1_5vw27"]
 [ext_resource type="Script" uid="uid://x0eq5slua18f" path="res://main.gd" id="2_kek77"]
 [ext_resource type="Texture2D" uid="uid://f8lbxtfml1ki" path="res://ui/icons/autorenew_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="2_lquwl"]
 [ext_resource type="Texture2D" uid="uid://c1cuu1ujil3cn" path="res://ui/icons/photo_size_select_small_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="3_7mycd"]
@@ -9,19 +9,19 @@
 [ext_resource type="Texture2D" uid="uid://e03h7m8yt8r3" path="res://ui/icons/settings_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="6_7mycd"]
 [ext_resource type="Script" uid="uid://gbe4swybcoqx" path="res://ffmpeg_funcs.gd" id="9_4c57u"]
 
-[node name="Main" type="Control" node_paths=PackedStringArray("input_file_path", "convert_format_option")]
+[node name="Main" type="Control" unique_id=608843615 node_paths=PackedStringArray("input_file_path", "convert_format_option")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("1_ig7tw")
+theme = ExtResource("1_5vw27")
 script = ExtResource("2_kek77")
 input_file_path = NodePath("MarginContainer/VBoxContainer/Header/FilePath")
-convert_format_option = NodePath("MarginContainer/VBoxContainer/VideoFuncs/Convert/Option")
+convert_format_option = NodePath("MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert/Option")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=624037857]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,7 +30,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.23921569, 0.23921569, 0.23921569, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=236200431]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -38,24 +38,24 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=276878008]
 layout_mode = 2
 
-[node name="Header" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=856953537]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Header" unique_id=73154455]
 layout_mode = 2
 text = "Input file:"
 
-[node name="FilePath" type="Button" parent="MarginContainer/VBoxContainer/Header"]
+[node name="FilePath" type="Button" parent="MarginContainer/VBoxContainer/Header" unique_id=1986637326]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 24
 text = "C:/___/______.___"
 alignment = 0
 
-[node name="FileDialog" type="FileDialog" parent="MarginContainer/VBoxContainer/Header/FilePath"]
+[node name="FileDialog" type="FileDialog" parent="MarginContainer/VBoxContainer/Header/FilePath" unique_id=1862728207]
 oversampling_override = 1.0
 title = "Open a File"
 position = Vector2i(0, 36)
@@ -66,89 +66,133 @@ file_mode = 0
 access = 2
 use_native_dialog = true
 
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1831580324]
 layout_mode = 2
 
-[node name="VideoFuncs" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="SimpleFuncs" type="PanelContainer" parent="MarginContainer/VBoxContainer" unique_id=1088961410]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Convert" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VideoFuncs"]
+[node name="VideoFuncs" type="VBoxContainer" parent="MarginContainer/VBoxContainer/SimpleFuncs" unique_id=1066129389]
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Convert"]
+[node name="Convert" type="Panel" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs" unique_id=1571574905]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Convert" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert" unique_id=1330036828]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert" unique_id=1544239028]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Convert"
 icon = ExtResource("2_lquwl")
 
-[node name="Option" type="OptionButton" parent="MarginContainer/VBoxContainer/VideoFuncs/Convert"]
+[node name="Option" type="OptionButton" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert" unique_id=1925137619]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Convert"]
+[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert" unique_id=592908617]
 layout_mode = 2
 text = "?"
 
-[node name="Compress" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VideoFuncs"]
+[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs" unique_id=212507316]
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Compress"]
+[node name="Compress" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel" unique_id=1779384590]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel/Compress" unique_id=5442024]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Compress"
 icon = ExtResource("3_7mycd")
 
-[node name="Option" type="LineEdit" parent="MarginContainer/VBoxContainer/VideoFuncs/Compress"]
+[node name="Option" type="LineEdit" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel/Compress" unique_id=30059838]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Compress"]
+[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel/Compress" unique_id=769342590]
 layout_mode = 2
 text = "?"
 
-[node name="Edit FPS" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VideoFuncs"]
+[node name="Panel2" type="Panel" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs" unique_id=965733786]
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Edit FPS"]
+[node name="Edit FPS" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2" unique_id=2093045092]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2/Edit FPS" unique_id=292567135]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Edit FPS"
 icon = ExtResource("4_272bh")
 
-[node name="Option" type="LineEdit" parent="MarginContainer/VBoxContainer/VideoFuncs/Edit FPS"]
+[node name="Option" type="LineEdit" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2/Edit FPS" unique_id=225623107]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Edit FPS"]
+[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2/Edit FPS" unique_id=239875659]
 layout_mode = 2
 text = "?"
 
-[node name="Extract Audio" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VideoFuncs"]
+[node name="Panel3" type="Panel" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs" unique_id=316124808]
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Extract Audio"]
+[node name="Extract Audio" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel3" unique_id=1157907412]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel3/Extract Audio" unique_id=96261285]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Extract audio"
 icon = ExtResource("5_5vw27")
 
-[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/VideoFuncs/Extract Audio"]
+[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel3/Extract Audio" unique_id=1284345597]
 layout_mode = 2
 text = "?"
 
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="AdvancedFuncs" type="PanelContainer" parent="MarginContainer/VBoxContainer" unique_id=1302281538]
+visible = false
 layout_mode = 2
 
-[node name="Bottom" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1614278628]
 layout_mode = 2
 
-[node name="AdvancedMode" type="Button" parent="MarginContainer/VBoxContainer/Bottom"]
+[node name="Bottom" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1829410065]
+layout_mode = 2
+
+[node name="AdvancedMode" type="Button" parent="MarginContainer/VBoxContainer/Bottom" unique_id=540394597]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Advanced mode"
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom"]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom" unique_id=73827196]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 8
@@ -157,11 +201,11 @@ text = "WRecode"
 horizontal_alignment = 1
 vertical_alignment = 2
 
-[node name="Settings" type="Button" parent="MarginContainer/VBoxContainer/Bottom"]
+[node name="Settings" type="Button" parent="MarginContainer/VBoxContainer/Bottom" unique_id=1422985031]
 layout_mode = 2
 icon = ExtResource("6_7mycd")
 
-[node name="Window" type="Window" parent="MarginContainer/VBoxContainer/Bottom/Settings"]
+[node name="Window" type="Window" parent="MarginContainer/VBoxContainer/Bottom/Settings" unique_id=420180303]
 disable_3d = true
 oversampling_override = 1.0
 title = "Options"
@@ -173,7 +217,7 @@ always_on_top = true
 minimize_disabled = true
 maximize_disabled = true
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window" unique_id=1549391281]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -182,50 +226,51 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer" unique_id=1493868669]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=2064640500]
 layout_mode = 2
 text = "Themes"
 
-[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer"]
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=726005509]
 layout_mode = 2
 columns = 3
 
-[node name="Dark" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer"]
+[node name="Dark" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer" unique_id=1101428682]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Green" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer"]
+[node name="Green" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer" unique_id=209210753]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="White" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer"]
+[node name="White" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer" unique_id=1900904939]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Pink" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer"]
+[node name="Pink" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer" unique_id=1178909289]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer"]
+[node name="CheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=229063610]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Decrease audio bitrate
 while compress video"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=774123405]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/HBoxContainer" unique_id=702773922]
 layout_mode = 2
 text = "Lang"
 
-[node name="OptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="OptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1309694471]
 layout_mode = 2
 
-[node name="ProgressBar" type="Panel" parent="."]
+[node name="ProgressBar" type="Panel" parent="." unique_id=165824987]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -233,14 +278,14 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -350.0
-offset_top = 150.0
+offset_top = 83.0
 offset_right = 350.0
-offset_bottom = 250.0
+offset_bottom = 183.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(350, 50)
 
-[node name="MarginContainer" type="MarginContainer" parent="ProgressBar"]
+[node name="MarginContainer" type="MarginContainer" parent="ProgressBar" unique_id=1766004024]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -248,24 +293,26 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ProgressBar/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="ProgressBar/MarginContainer" unique_id=197075137]
 layout_mode = 2
 
-[node name="ProgressBar" type="ProgressBar" parent="ProgressBar/MarginContainer/VBoxContainer"]
+[node name="ProgressBar" type="ProgressBar" parent="ProgressBar/MarginContainer/VBoxContainer" unique_id=2103768862]
 layout_mode = 2
 size_flags_vertical = 2
 
-[node name="Label" type="Label" parent="ProgressBar/MarginContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="ProgressBar/MarginContainer/VBoxContainer" unique_id=239194556]
 layout_mode = 2
-text = "Process [file.___] | output"
+text = "Process [file.___] | output | timings"
 
-[node name="ffmpeg funcs" type="Node" parent="."]
+[node name="ffmpeg funcs" type="Node" parent="." unique_id=1611590948]
 script = ExtResource("9_4c57u")
+devmode = true
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Header/FilePath" to="." method="_select_file_pressed"]
 [connection signal="file_selected" from="MarginContainer/VBoxContainer/Header/FilePath/FileDialog" to="." method="_on_file_selected"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/VideoFuncs/Convert/Function" to="." method="_convert_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/VideoFuncs/Compress/Function" to="." method="_compress_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/VideoFuncs/Edit FPS/Function" to="." method="_editfps_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/VideoFuncs/Extract Audio/Function" to="." method="_extractaudio_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert/Function" to="." method="_convert_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel/Compress/Function" to="." method="_compress_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2/Edit FPS/Function" to="." method="_editfps_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel3/Extract Audio/Function" to="." method="_extractaudio_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Bottom/Settings" to="." method="_on_settings_pressed"]
+[connection signal="close_requested" from="MarginContainer/VBoxContainer/Bottom/Settings/Window" to="." method="_on_options_close_requested"]

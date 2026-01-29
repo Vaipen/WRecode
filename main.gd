@@ -1,6 +1,6 @@
 extends Control
 
-var file_path: String = "C:/file.mp4"
+var file_path : String
 @export var input_file_path : Button
 @export var convert_format_option : OptionButton
 @onready var ffmpeg: Node = $"ffmpeg funcs"
@@ -15,14 +15,14 @@ var file_types = {
 func _ready() -> void:
 	var args = OS.get_cmdline_args()
 	if args.size() > 1:
-		file_path = args[1].strip_edges()
+		_update_inputfile(args[1].strip_edges())
 		print("Args: ", file_path)
 	else:
 		push_error("Invalid file path")
-	_update_inputfile(file_path)
+	
 
 func _convert_pressed() -> void:
-	pass
+	ffmpeg.convert_video($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert/Option.get_item_text($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert/Option.get_selected_id()))
 
 
 func _compress_pressed() -> void:
@@ -34,7 +34,7 @@ func _editfps_pressed() -> void:
 
 
 func _extractaudio_pressed() -> void:
-	ffmpeg.change_audio_bitrate_in_video(5000)
+	ffmpeg.change_audio_bitrate_in_video(1000)
 
 
 func _select_file_pressed() -> void:
@@ -67,3 +67,7 @@ func show_windows_notification(title: String, message: String):
 	
 	if exit_code != 0:
 		push_error("Failed to show notification")
+
+
+func _on_options_close_requested() -> void:
+	$MarginContainer/VBoxContainer/Bottom/Settings/Window.hide()
