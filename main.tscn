@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://x0eq5slua18f" path="res://main.gd" id="2_kek77"]
 [ext_resource type="Texture2D" uid="uid://f8lbxtfml1ki" path="res://ui/icons/autorenew_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="2_lquwl"]
 [ext_resource type="Texture2D" uid="uid://c1cuu1ujil3cn" path="res://ui/icons/photo_size_select_small_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="3_7mycd"]
+[ext_resource type="FontFile" uid="uid://ctydgle6cex1d" path="res://fonts/BBH_Hegarty/BBHHegarty-Regular.ttf" id="3_kek77"]
 [ext_resource type="Texture2D" uid="uid://ds1on1jex6b2t" path="res://ui/icons/speed_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="4_272bh"]
 [ext_resource type="Texture2D" uid="uid://b0pe3t8eyp1m0" path="res://ui/icons/replace_audio_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="5_5vw27"]
 [ext_resource type="Texture2D" uid="uid://e03h7m8yt8r3" path="res://ui/icons/settings_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="6_7mycd"]
@@ -46,7 +47,9 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Header" unique_id=73154455]
 layout_mode = 2
-text = "Input file:"
+theme_override_fonts/font = ExtResource("3_kek77")
+theme_override_font_sizes/font_size = 29
+text = "File:"
 
 [node name="FilePath" type="Button" parent="MarginContainer/VBoxContainer/Header" unique_id=1986637326]
 layout_mode = 2
@@ -59,7 +62,7 @@ alignment = 0
 oversampling_override = 1.0
 title = "Open a File"
 position = Vector2i(0, 36)
-size = Vector2i(653, 360)
+size = Vector2i(660, 360)
 ok_button_text = "Select"
 dialog_hide_on_ok = true
 file_mode = 0
@@ -92,12 +95,14 @@ grow_vertical = 2
 [node name="Function" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert" unique_id=1544239028]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
 text = "Convert"
 icon = ExtResource("2_lquwl")
 
 [node name="Option" type="OptionButton" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert" unique_id=1925137619]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert" unique_id=592908617]
 layout_mode = 2
@@ -118,12 +123,15 @@ grow_vertical = 2
 [node name="Function" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel/Compress" unique_id=5442024]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
 text = "Compress"
 icon = ExtResource("3_7mycd")
 
 [node name="Option" type="LineEdit" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel/Compress" unique_id=30059838]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+placeholder_text = "MB"
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel/Compress" unique_id=769342590]
 layout_mode = 2
@@ -144,12 +152,17 @@ grow_vertical = 2
 [node name="Function" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2/Edit FPS" unique_id=292567135]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
 text = "Edit FPS"
 icon = ExtResource("4_272bh")
 
 [node name="Option" type="LineEdit" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2/Edit FPS" unique_id=225623107]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+placeholder_text = "FPS"
+emoji_menu_enabled = false
+virtual_keyboard_type = 2
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2/Edit FPS" unique_id=239875659]
 layout_mode = 2
@@ -170,6 +183,7 @@ grow_vertical = 2
 [node name="Function" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel3/Extract Audio" unique_id=96261285]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
 text = "Extract audio"
 icon = ExtResource("5_5vw27")
 
@@ -196,6 +210,7 @@ text = "Advanced mode"
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 8
+theme_override_fonts/font = ExtResource("3_kek77")
 theme_override_font_sizes/font_size = 16
 text = "WRecode"
 horizontal_alignment = 1
@@ -253,11 +268,25 @@ size_flags_horizontal = 3
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=229063610]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=1238822353]
+layout_mode = 2
+
+[node name="DecreaseAudioBitrate" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=229063610]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Decrease audio bitrate
 while compress video"
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=121499903]
+layout_mode = 2
+
+[node name="ADVMODEdefault" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=1641726292]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Advanced mode by default"
+
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=568391316]
+layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=774123405]
 layout_mode = 2
