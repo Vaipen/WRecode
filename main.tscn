@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://78e6lxx8puvw"]
 
-[ext_resource type="Theme" uid="uid://bp7665k4n8m6y" path="res://Theme.tres" id="1_5vw27"]
+[ext_resource type="Theme" uid="uid://bp7665k4n8m6y" path="res://theme.tres" id="1_5vw27"]
 [ext_resource type="Script" uid="uid://x0eq5slua18f" path="res://main.gd" id="2_kek77"]
 [ext_resource type="Texture2D" uid="uid://f8lbxtfml1ki" path="res://ui/icons/autorenew_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="2_lquwl"]
 [ext_resource type="Texture2D" uid="uid://c1cuu1ujil3cn" path="res://ui/icons/photo_size_select_small_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="3_7mycd"]
-[ext_resource type="FontFile" uid="uid://ctydgle6cex1d" path="res://fonts/BBH_Hegarty/BBHHegarty-Regular.ttf" id="3_kek77"]
+[ext_resource type="FontFile" uid="uid://dixajpvoymgfu" path="res://fonts/Inter/static/Inter_28pt-Black.ttf" id="3_kek77"]
 [ext_resource type="Texture2D" uid="uid://ds1on1jex6b2t" path="res://ui/icons/speed_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="4_272bh"]
 [ext_resource type="Texture2D" uid="uid://b0pe3t8eyp1m0" path="res://ui/icons/replace_audio_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="5_5vw27"]
 [ext_resource type="Texture2D" uid="uid://e03h7m8yt8r3" path="res://ui/icons/settings_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="6_7mycd"]
@@ -29,7 +29,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.23921569, 0.23921569, 0.23921569, 1)
+color = Color(0.16, 0.16, 0.16, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=236200431]
 layout_mode = 1
@@ -106,6 +106,8 @@ theme_override_font_sizes/font_size = 40
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert" unique_id=592908617]
 layout_mode = 2
+tooltip_text = "Choose a video file extension"
+disabled = true
 text = "?"
 
 [node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs" unique_id=212507316]
@@ -135,6 +137,8 @@ placeholder_text = "MB"
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel/Compress" unique_id=769342590]
 layout_mode = 2
+tooltip_text = "Enter the output size in megabytes"
+disabled = true
 text = "?"
 
 [node name="Panel2" type="Panel" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs" unique_id=965733786]
@@ -166,6 +170,8 @@ virtual_keyboard_type = 2
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2/Edit FPS" unique_id=239875659]
 layout_mode = 2
+tooltip_text = "Enter the output video FPS (frames per second)"
+disabled = true
 text = "?"
 
 [node name="Panel3" type="Panel" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs" unique_id=316124808]
@@ -189,11 +195,78 @@ icon = ExtResource("5_5vw27")
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel3/Extract Audio" unique_id=1284345597]
 layout_mode = 2
+tooltip_text = "Extract audio"
+disabled = true
 text = "?"
 
 [node name="AdvancedFuncs" type="PanelContainer" parent="MarginContainer/VBoxContainer" unique_id=1302281538]
-visible = false
 layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VideoFuncs" type="VBoxContainer" parent="MarginContainer/VBoxContainer/AdvancedFuncs" unique_id=611979200]
+layout_mode = 2
+
+[node name="Panel4" type="Panel" parent="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs" unique_id=645470719]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Change bitrate" type="HBoxContainer" parent="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel4" unique_id=73412743]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel4/Change bitrate" unique_id=894688667]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "Change bitrate"
+icon = ExtResource("3_7mycd")
+
+[node name="Option" type="LineEdit" parent="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel4/Change bitrate" unique_id=1212463923]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+placeholder_text = "kb/s"
+
+[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel4/Change bitrate" unique_id=2025501641]
+layout_mode = 2
+tooltip_text = "Enter the output video bitrate in kb/s (kilobytes per second)"
+disabled = true
+text = "?"
+
+[node name="Panel5" type="Panel" parent="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs" unique_id=346856878]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Change abitrate" type="HBoxContainer" parent="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel5" unique_id=1710841979]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Function" type="Button" parent="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel5/Change abitrate" unique_id=1855702174]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "Change audio bitrate"
+icon = ExtResource("3_7mycd")
+
+[node name="Option" type="LineEdit" parent="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel5/Change abitrate" unique_id=1958001190]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+placeholder_text = "kb/s"
+
+[node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel5/Change abitrate" unique_id=1448738230]
+layout_mode = 2
+tooltip_text = "Enter the output audio bitrate in video in kb/s (kilobytes per second)"
+disabled = true
+text = "?"
 
 [node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1614278628]
 layout_mode = 2
@@ -226,11 +299,20 @@ oversampling_override = 1.0
 title = "Options"
 initial_position = 1
 size = Vector2i(400, 500)
-visible = false
 unresizable = true
 always_on_top = true
 minimize_disabled = true
 maximize_disabled = true
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window" unique_id=1163120862]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.07450981, 0.07450981, 0.07450981, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window" unique_id=1549391281]
 anchors_preset = 15
@@ -242,33 +324,6 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer" unique_id=1493868669]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=2064640500]
-layout_mode = 2
-text = "Themes"
-
-[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=726005509]
-layout_mode = 2
-columns = 3
-
-[node name="Dark" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer" unique_id=1101428682]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Green" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer" unique_id=209210753]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="White" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer" unique_id=1900904939]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Pink" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GridContainer" unique_id=1178909289]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=1238822353]
 layout_mode = 2
 
 [node name="DecreaseAudioBitrate" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=229063610]
@@ -288,12 +343,20 @@ text = "Advanced mode by default"
 [node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=568391316]
 layout_mode = 2
 
+[node name="SYSYTEMWINDOWstyle" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=1546441610]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "System window style"
+
+[node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=257478286]
+layout_mode = 2
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=774123405]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/HBoxContainer" unique_id=702773922]
 layout_mode = 2
-text = "Lang"
+text = "Language"
 
 [node name="OptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1309694471]
 layout_mode = 2
