@@ -18,16 +18,10 @@ Make sure you have installed [python](https://www.python.org/downloads/windows) 
 ## Congratulations! Script installed, and you can run it from context menu (Send to)
 <img width="772" height="504" alt="image" src="https://github.com/user-attachments/assets/7b445446-76e5-4ef1-817e-29e79cb54758" />
 
-
-
 Enjoy!
 
 > [!IMPORTANT]
 > If you move WRecode folder, reinstall app with **uninstall.py**, and **install.py** again from new folder
-> 
-> Make sure your user name not contain space, if it is, you may start WRecode convert.bat file manually.
-> Copy file from C:\Users\user\AppData\Roaming\Microsoft\Windows\SendTo\WRecode convert.bat.
-> Drag&drop media on it and it works
 
 
 > [!WARNING]
