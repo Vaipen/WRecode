@@ -177,13 +177,6 @@ class WRecode(App):
             choices = [Label(text='File not supported', font_name="misc\InterTight-SemiBold.ttf", font_size=17)]
             labels = [Label(text='')]
 
-        # for i in labels:
-        #     with i.canvas:
-        #         Color(0, 1, 0, 0.25)
-        #         Rectangle(pos=i.pos, size=i.size)
-
-        dropdown = DropDown()
-
 
         for i in range(len(self.parameters)):
             g = BoxLayout(orientation='horizontal')
@@ -197,68 +190,115 @@ class WRecode(App):
             g.add_widget(labels[i + len(self.parameters)])
             self.map.append([g])
         self.layout = BoxLayout(orientation='vertical')
-        
-        # self.opened = None
-        # self.settings = [
-        #     Button(text='Themes', on_press=self.open_themes)
-        # ]
-        # self.themes = GridLayout()
-        # self.themes.add_widget(Button(text='Dark', on_press=lambda *args: , color=pallete_dark['Main']))
-        # self.themes.add_widget(Button(text='Dark Green', on_press=lambda *args: , color=pallete_darkgreen['Main']))
-        # self.themes.add_widget(Button(text='White', on_press=lambda *args: , color=pallete_white['Main']))
-        # self.themes.add_widget(Button(text='White Blue', on_press=lambda *args: , color=pallete_whiteblue['Main']))
-        # self.themes.add_widget(Button(text='Default', on_press=lambda *args: , color=pallete_green['Main']))
-        # self.themes.add_widget(Button(text='Pink', on_press=lambda *args: , color=pallete_pink['Main']))
+
+
+        self.setting = None
+        self.settings = [
+            [Button(text='Themes', on_press=self._settings, background_color=mainpallete["Back"],background_normal='misc/btn.png', color=mainpallete["Highlight"], font_name="misc\InterTight-Bold.ttf", font_size=24)],
+            [GridLayout(rows=2)]
+        ]
+        self.settings[1][0].add_widget(Button(text='Dark', on_press=lambda *args: self.change_theme(self, 'pallete_dark'), background_color=(0.133,0.153,0.145,1.0), font_name="misc\InterTight-Medium.ttf",background_normal='misc/btn.png'))
+        self.settings[1][0].add_widget(Button(text='Dark Green', on_press=lambda *args: self.change_theme(self, 'pallete_darkgreen'), background_color=(0.537,0.596,0.471,1.0), font_name="misc\InterTight-Medium.ttf",background_normal='misc/btn.png'))
+        self.settings[1][0].add_widget(Button(text='White', on_press=lambda *args: self.change_theme(self, 'pallete_white'), background_color=(1.0,1.0,1.0,1.0), font_name="misc\InterTight-Medium.ttf",background_normal='misc/btn.png', color=(0,0,0,1)))
+        self.settings[1][0].add_widget(Button(text='White Blue', on_press=lambda *args: self.change_theme(self, 'pallete_whiteblue'), background_color=(0.682,0.851,0.878,1.0), font_name="misc\InterTight-Medium.ttf",background_normal='misc/btn.png', color=(0,0.2,0.2,1)))
+        self.settings[1][0].add_widget(Button(text='Green', on_press=lambda *args: self.change_theme(self, 'pallete_green'), background_color=(0.537,0.596,0.471,1.0), font_name="misc\InterTight-Medium.ttf",background_normal='misc/btn.png'))
+        self.settings[1][0].add_widget(Button(text='Pink', on_press=lambda *args: self.change_theme(self, 'pallete_pink'), background_color=(0.878,0.478,0.635,1.0), font_name="misc\InterTight-Medium.ttf",background_normal='misc/btn.png'))
+
 
         for row in self.map:
-            l = BoxLayout(orientation='horizontal')
+            _l = BoxLayout(orientation='horizontal')
             for obj in row:
-                l.add_widget(obj)
-            self.layout.add_widget(l)
+                _l.add_widget(obj)
+            self.layout.add_widget(_l)
+        _l = BoxLayout(orientation='horizontal', size_hint_y=0.5)
+        for obj in self.settings[0]:
+            _l.add_widget(obj)
+        self.layout.add_widget(_l)
+        # self.window_size = (800, len(choices) * 75)
         
-        self.window_size = (800, len(choices) * 75)
-        
-        self.settings_height = 0
+        # self.settings_height = 0
 
 
+        
+        
+        
 
         return self.layout
     
 
-    # Сохранение новой палитры:
-    # data['last_used'] = 'pallete_pink'  # меняешь на ту что выбрал
 
-    # with open('palletes.json', 'w') as f:
-    #     json.dump(data, f, indent=2)
-
-    # def open_settings(self, instance):
-    #     yiff: 
-    #     return 
 
     def _print(self, instance):
         print(self.input.text)
 
+    def _settings(self, instance):
+        sett_inst = self.settings[0].index(instance)
+        if self.setting == None:
+            self.layout.add_widget(self.settings[1][sett_inst])
+            self.setting = sett_inst
+        else:
+            # sett_sett = self.settings[0][self.setting]
+            self.layout.remove_widget(self.layout.children[0])
+            if instance.text == self.settings[0][self.setting].text:
+                self.setting = None
+            else:
+                self.layout.add_widget(self.settings[1][sett_inst])
+                self.setting = sett_inst
+
+    def change_theme(self, instance, theme):
+        # Сохранение новой палитры:
+        data['last_used'] = theme
+        with open(str(script_abs_path.parent) + '\palletes.json', 'w') as f:
+            json.dump(data, f, indent=2)
+        self.stop()
     
     #Video funcs
     def change_audio_bitrate_in_video(self, instance, bitrate):
         command = [ffmpeg_path, '-i', file, '-b:a' ,f'{self.parameters[bitrate].text}k', f'{abs_file.stem}_audio_compressed_{self.parameters[bitrate].text}{abs_file.suffix}']
-        subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
 
     def change_fps(self, instance, fps):
         command = [ffmpeg_path, '-i', file, '-vf', f'fps={self.parameters[fps].text}', f'{abs_file.stem}_editfps{self.parameters[fps].text}{abs_file.suffix}']
-        subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
 
     def extract_audio(self, instance):
         command = [ffmpeg_path, '-i', file, '-vn', f'{abs_file.stem}_extracted.mp3']
-        subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
 
     def change_bitrate(self, instance, bitrate):
-        command = [ffmpeg_path, '-i', file, '-b:v' f'{self.parameters[bitrate].text}k', f'{abs_file.stem}_changed_bitrate{self.parameters[bitrate].text}{abs_file.suffix}']
-        subprocess.run(command, capture_output=True, text=True)
+        command = [ffmpeg_path, '-i', file, '-b:v', f'{self.parameters[bitrate].text}k', f'{abs_file.stem}_changed_bitrate{self.parameters[bitrate].text}{abs_file.suffix}']
+        print()
+        print(command)
+        print()
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
 
     def convert_video(self, instance, format):
-        command = [ffmpeg_path, '-i', abs_file.name, '-c copy' f'{abs_file.stem}.{self.parameters[format].text}']
-        subprocess.run(command, capture_output=True, text=True)
+        command = [ffmpeg_path, '-i', file, '-c', 'copy', f'{abs_file.stem}.{self.parameters[format].text}']
+        print()
+        print(command)
+        print()
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
+        
 
     def compress_video_by_size(self, instance, target_size_mb):
         try:
@@ -343,10 +383,16 @@ class WRecode(App):
 
         null_out = "NUL" if os.name == "nt" else "/dev/null"
         print("The compression has began")
-        pass1 = [ffmpeg_path, '-fflags', '+genpts+igndts', '-avoid_negative_ts', 'make_zero', '-loglevel info', '-i', file, '-fps_mode', 'passthrough', '-c:v', 'libx264', '-b:v', f'{video_kbps}k', '-pass', 1, '-passlogfile', passlog, '-an', '-f', 'null', null_out]
-        pass2 = [ffmpeg_path, '-fflags', '+genpts+igndts', '-avoid_negative_ts', 'make_zero', '-loglevel info', '-i', file, '-fps_mode', 'passthrough', '-c:v', 'libx264', '-b:v', f'{video_kbps}k', '-pass', 2, '-passlogfile', passlog, '-c:a', 'aac', '-b:a', f'{audio_kbps}k', f'{abs_file.stem}_compessed{abs_file.suffix}']
-        subprocess.run(pass1, capture_output=True, text=True)
-        subprocess.run(pass2, capture_output=True, text=True)
+        pass1 = [ffmpeg_path, '-fflags', '+genpts+igndts', '-avoid_negative_ts', 'make_zero', '-loglevel', 'info', '-i', file, '-fps_mode', 'passthrough', '-c:v', 'libx264', '-b:v', f'{video_kbps}k', '-pass', '1', '-passlogfile', passlog, '-an', '-f', 'null', null_out]
+        pass2 = [ffmpeg_path, '-fflags', '+genpts+igndts', '-avoid_negative_ts', 'make_zero', '-loglevel', 'info', '-i', file, '-fps_mode', 'passthrough', '-c:v', 'libx264', '-b:v', f'{video_kbps}k', '-pass', '2', '-passlogfile', passlog, '-c:a', 'aac', '-b:a', f'{audio_kbps}k', f'{abs_file.stem}_compessed{abs_file.suffix}']
+        result1 = subprocess.run(pass1, shell=True)
+        result2 = subprocess.run(pass2, shell=True)
+        if result1.returncode == 0 and result2.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result1.returncode}")
+            print(f"Ошибка! Код: {result2.returncode}")
+        
 
         for ext in (".log", ".log.mbtree"):
             log_file = Path(str(passlog) + "-0" + ext)
@@ -354,21 +400,37 @@ class WRecode(App):
                 log_file.unlink()
 
     def resize_video(self, instance, size):
-        command = [ffmpeg_path, '-i', file, '-vf', f'scale={self.parameters[size].text}', f'{abs_file.stem}_resized{self.parameters[size].text}{abs_file.suffix}']
-        subprocess.run(command, capture_output=True, text=True)
+        command = [ffmpeg_path, '-i', file, '-vf', f'scale={self.parameters[size].text}', f'{abs_file.stem}_resized{str(self.parameters[size].text).replace(":","x")}{abs_file.suffix}']
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
 
     #Image funcs
     def convert_image(self, instance, format):
         command = [ffmpeg_path, '-i', file, f'{abs_file.stem}.{self.parameters[format].text}']
-        subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
 
     def resize_image(self, instance, size):
-        command = [ffmpeg_path, '-i', file, '-s', f'{self.parameters[size].text}', f'{abs_file.stem}_resized{self.parameters[size].text}{abs_file.suffix}']
-        subprocess.run(command, capture_output=True, text=True)
+        command = [ffmpeg_path, '-i', file, '-s', f'{self.parameters[size].text}', f'{abs_file.stem}_resized{str(self.parameters[size].text).replace(":","x")}{abs_file.suffix}']
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
 
     def compress_image(self, instance, jpeg_parameter):
         command = [ffmpeg_path, '-i', file, '-q:v', f'{self.parameters[jpeg_parameter].text}', f'{abs_file.stem}_compressed.jpg']
-        subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
     #Audio funcs
     def convert_audio(self, instance, format):
         print(self.parameters[format].text)
@@ -377,7 +439,7 @@ class WRecode(App):
         elif self.parameters[format].text == "mp3":
             command = [ffmpeg_path, '-i', file, '-c:a', 'libmp3lame', f'{abs_file.stem}.{self.parameters[format].text}']
         elif self.parameters[format].text == "flac":
-            command = [ffmpeg_path, '-i', file, '-c:a', 'flac', '-compression_level', 8, f'{abs_file.stem}.{self.parameters[format].text}']
+            command = [ffmpeg_path, '-i', file, '-c:a', 'flac', '-compression_level', '8', f'{abs_file.stem}.{self.parameters[format].text}']
         elif self.parameters[format].text == "ogg":
             command = [ffmpeg_path, '-i', file, '-c:a', 'libvorbis', f'{abs_file.stem}.{self.parameters[format].text}']
         elif self.parameters[format].text == "aac":
@@ -390,13 +452,25 @@ class WRecode(App):
             command = [ffmpeg_path, '-i', file, '-c:a', 'pcm_s16be', f'{abs_file.stem}.{self.parameters[format].text}']
         else:
             command = "echo Wrong format"
-        subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
     def change_audio_bitrate(self, instance, bitrate):
         command = [ffmpeg_path, '-i', file, '-c:a', 'libmp3lame', '-b:a', f'{self.parameters[bitrate].text}k', f'{abs_file.stem}_compressed{self.parameters[bitrate].text}.mp3']
-        subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
     def change_audio_samplerate(self, instance, sample_rate):
         command = [ffmpeg_path, '-i', file, '-ar', f'{self.parameters[sample_rate].text}', f'{abs_file.stem}_{self.parameters[sample_rate].text}.wav']
-        subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True)
+        if result.returncode == 0:
+            print("Успешно!")
+        else:
+            print(f"Ошибка! Код: {result.returncode}")
 
 WRecode().run()
 
