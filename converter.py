@@ -1,8 +1,8 @@
 import os
 import sys
-
 from kivy.app import App  # чтобы все писать не с нуля
 from kivy.uix.boxlayout import BoxLayout  # единственный который я помню как работает
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
@@ -48,53 +48,18 @@ from pathlib import Path
 #Color palette (0.0 - 1.0)
 
 
-pallete_dark = {"Background": (0,0,0,1),
-            "Back": (18/255,17/255,19/255,1),
-            "Main": (34/255,39/255,37/255,1),
-            "Highlight": (238/255,240/255,242/255,1),
-            "Contrast": (250/255,250/255,255/255,1)}
 
-pallete_darkgreen = {"Background": (18/255,17/255,19/255,1),
-            "Back": (18/255,17/255,19/255,1),
-            "Main": (137/255,152/255,120/255,1),
-            "Highlight": (228/255,230/255,195/255,1),
-            "Contrast": (247/255,247/255,242/255,1)}
-
-pallete_white = {"Background": (255/255,255/255,255/255,1),
-            "Back": (255/255,255/255,255/255,1),
-            "Main": (255/255,255/255,255/255,1),
-            "Highlight": (0,0,0,1),
-            "Contrast": (0,0,0,1)}
-
-pallete_whiteblue = {"Background": (184/255,242/255,230/255,1),
-            "Back": (255/255,255/255,255/255,1),
-            "Main": (174/255,217/255,224/255,1),
-            "Highlight": (26/255,83/255,92/255,1),
-            "Contrast": (34/255,51/255,59/255,1)}
-
-pallete_green = {"Background": (18/255,17/255,19/255,1),
-            "Back": (34/255,29/255,37/255,1),
-            "Main": (137/255,152/255,120/255,1),
-            "Highlight": (228/255,230/255,195/255,1),
-            "Contrast": (247/255,247/255,242/255,1)}
-
-pallete_pink = {"Background": (96/255,36/255,55/255,1),
-            "Back": (138/255,40/255,70/255,1),
-            "Main": (224/255,122/255,162/255,1),
-            "Highlight": (225/255,194/255,212/255,1),
-            "Contrast": (225/255,224/255,233/255,1)}
-
-mainpallete = pallete_dark
 
 script_path = os.path.abspath(__file__)
+script_abs_path = Path(os.path.abspath(__file__))
 ffmpeg_folder = r"ffmpeg\bin\ffmpeg.exe"
 ffprobe_folder = r"ffmpeg\bin\ffprobe.exe"
 ffmpeg_path= script_path.replace("converter.py","")+ffmpeg_folder
 ffprobe_path= script_path.replace("converter.py","")+ffprobe_folder
 
-dev_mode=1
+dev_mode=0
 if dev_mode == 1:
-    file = "D:\Клипы\clip.mp4"
+    file = "D:\Клипы\clip.png"
 else:
     file = str(sys.argv[1])
 abs_file = Path(file)
@@ -103,6 +68,12 @@ file_types = {
     'video': ("mp4", "avi", "mov", "mkv", "webm", "flv", "wmv"),
     'audio': ("mp3", "wav", "flac", "aac", "ogg", "m4a")
 }
+
+with open(f"{script_abs_path.parent}\palletes.json", 'r+') as f:
+    data = json.load(f)
+
+last_used = data['last_used']
+mainpallete = data['palletes'][last_used]  # получаешь последнюю палитру
 
 buttons_design = {
     'background_color': mainpallete["Main"],
@@ -115,20 +86,15 @@ label_design = {
     'color': mainpallete["Contrast"],
     'font_name': "misc\InterTight-SemiBold.ttf",
     'font_size':13
-    # 'border_width': 2,
-    # 'outline_color': (1,1,1,1)
 }
 edit_box_design = {
     'multiline': False,
     'background_color': mainpallete["Back"], 
     'foreground_color': mainpallete["Contrast"],
     'font_name': "misc/InterTight-Medium.ttf"
-    # 'outline_width': 2,
-    # 'outline_color': (1,1,1,1)
 }
 
 Window.clearcolor = mainpallete["Background"]
-
 
 
 
@@ -148,7 +114,7 @@ class WRecode(App):
         #     abs_file = Path(self.input.text)
 
         input_layout.add_widget(input_label)
-        self.input = TextInput(text=file, on_text_validate=self.change_file_path, **edit_box_design, font_size=18) # пиши в лс я без звука щаSyntaxError: positional argument follows keyword argument где ну я выделяю блят, ты
+        self.input = Label(text=file, font_name="misc\InterTight-SemiBold.ttf", font_size=18) # пиши в лс я без звука щаSyntaxError: positional argument follows keyword argument где ну я выделяю блят, ты
         input_layout.add_widget(self.input)
         file_layout.add_widget(input_layout)
         self.map.append([file_layout])
@@ -232,13 +198,42 @@ class WRecode(App):
             self.map.append([g])
         self.layout = BoxLayout(orientation='vertical')
         
+        # self.opened = None
+        # self.settings = [
+        #     Button(text='Themes', on_press=self.open_themes)
+        # ]
+        # self.themes = GridLayout()
+        # self.themes.add_widget(Button(text='Dark', on_press=lambda *args: , color=pallete_dark['Main']))
+        # self.themes.add_widget(Button(text='Dark Green', on_press=lambda *args: , color=pallete_darkgreen['Main']))
+        # self.themes.add_widget(Button(text='White', on_press=lambda *args: , color=pallete_white['Main']))
+        # self.themes.add_widget(Button(text='White Blue', on_press=lambda *args: , color=pallete_whiteblue['Main']))
+        # self.themes.add_widget(Button(text='Default', on_press=lambda *args: , color=pallete_green['Main']))
+        # self.themes.add_widget(Button(text='Pink', on_press=lambda *args: , color=pallete_pink['Main']))
+
         for row in self.map:
             l = BoxLayout(orientation='horizontal')
             for obj in row:
                 l.add_widget(obj)
             self.layout.add_widget(l)
         
+        self.window_size = (800, len(choices) * 75)
+        
+        self.settings_height = 0
+
+
+
         return self.layout
+    
+
+    # Сохранение новой палитры:
+    # data['last_used'] = 'pallete_pink'  # меняешь на ту что выбрал
+
+    # with open('palletes.json', 'w') as f:
+    #     json.dump(data, f, indent=2)
+
+    # def open_settings(self, instance):
+    #     yiff: 
+    #     return 
 
     def _print(self, instance):
         print(self.input.text)
@@ -246,47 +241,29 @@ class WRecode(App):
     
     #Video funcs
     def change_audio_bitrate_in_video(self, instance, bitrate):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -b:a {self.parameters[bitrate].text}k {abs_file.stem}_audio_compressed{abs_file.suffix}"
-        os.system(command)
+        command = [ffmpeg_path, '-i', file, '-b:a' ,f'{self.parameters[bitrate].text}k', f'{abs_file.stem}_audio_compressed_{self.parameters[bitrate].text}{abs_file.suffix}']
+        subprocess.run(command, capture_output=True, text=True)
 
     def change_fps(self, instance, fps):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f'cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -vf "fps={self.parameters[fps].text}" {abs_file.stem}_editfps{abs_file.suffix}'
-        os.system(command)
+        command = [ffmpeg_path, '-i', file, '-vf', f'fps={self.parameters[fps].text}', f'{abs_file.stem}_editfps{self.parameters[fps].text}{abs_file.suffix}']
+        subprocess.run(command, capture_output=True, text=True)
 
     def extract_audio(self, instance):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -vn {abs_file.stem}_extracted.mp3"
-        os.system(command)
+        command = [ffmpeg_path, '-i', file, '-vn', f'{abs_file.stem}_extracted.mp3']
+        subprocess.run(command, capture_output=True, text=True)
 
     def change_bitrate(self, instance, bitrate):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -b:v {self.parameters[bitrate].text}k {abs_file.stem}_changed_bitrate{abs_file.suffix}"
-        os.system(command)
+        command = [ffmpeg_path, '-i', file, '-b:v' f'{self.parameters[bitrate].text}k', f'{abs_file.stem}_changed_bitrate{self.parameters[bitrate].text}{abs_file.suffix}']
+        subprocess.run(command, capture_output=True, text=True)
 
     def convert_video(self, instance, format):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -c copy {abs_file.stem}_converted.{self.parameters[format].text}"
-        os.system(command)
+        command = [ffmpeg_path, '-i', abs_file.name, '-c copy' f'{abs_file.stem}.{self.parameters[format].text}']
+        subprocess.run(command, capture_output=True, text=True)
 
     def compress_video_by_size(self, instance, target_size_mb):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        
         try:
             target_size_mb = float(self.parameters[target_size_mb].text)
+            print("Please wait, calculating bitrate...")
             if target_size_mb <= 0:
                 raise ValueError
         except:
@@ -333,17 +310,20 @@ class WRecode(App):
 
         target_bits = target_size_mb *8*1024*1024
         total_bitrate = target_bits / duration
-        audio_steps = [160000, 128000, 96000, 64000, 48000]
+        audio_steps = [192000, 160000, 128000, 96000, 64000, 48000, 32000]
         audio_steps = [a for a in audio_steps if a <= audio_bitrate]
-
-        video_bitrate = total_bitrate - audio_bitrate
+        if not audio_steps:
+            audio_steps = [audio_bitrate]
 
         for a in audio_steps:
             vb = total_bitrate - a
-            if vb >= 300_000:
+            if vb >= 20000:
                 audio_bitrate = a
                 video_bitrate = vb
                 break
+        else:
+            audio_bitrate = audio_steps[-1]
+            video_bitrate = max(1, total_bitrate - audio_bitrate)
 
 
         if video_bitrate <= 0:
@@ -362,11 +342,11 @@ class WRecode(App):
             os.remove("ffmpeg2pass-0.log")
 
         null_out = "NUL" if os.name == "nt" else "/dev/null"
-
-        pass1 = (f'{ffmpeg_path} -fflags +genpts+igndts -avoid_negative_ts make_zero -loglevel warning  -i "{file}" -fps_mode passthrough -c:v libx264 -b:v {video_kbps}k -pass 1 -passlogfile "{passlog}" -an -f null {null_out}')
-        pass2 = (f'{ffmpeg_path} -fflags +genpts+igndts -avoid_negative_ts make_zero -loglevel warning  -i "{file}" -fps_mode passthrough -c:v libx264 -b:v {video_kbps}k -pass 2 -passlogfile "{passlog}" -c:a aac -b:a {audio_kbps}k {abs_file.stem}_compessed{abs_file.suffix}')
-        os.system(pass1)
-        os.system(pass2)
+        print("The compression has began")
+        pass1 = [ffmpeg_path, '-fflags', '+genpts+igndts', '-avoid_negative_ts', 'make_zero', '-loglevel info', '-i', file, '-fps_mode', 'passthrough', '-c:v', 'libx264', '-b:v', f'{video_kbps}k', '-pass', 1, '-passlogfile', passlog, '-an', '-f', 'null', null_out]
+        pass2 = [ffmpeg_path, '-fflags', '+genpts+igndts', '-avoid_negative_ts', 'make_zero', '-loglevel info', '-i', file, '-fps_mode', 'passthrough', '-c:v', 'libx264', '-b:v', f'{video_kbps}k', '-pass', 2, '-passlogfile', passlog, '-c:a', 'aac', '-b:a', f'{audio_kbps}k', f'{abs_file.stem}_compessed{abs_file.suffix}']
+        subprocess.run(pass1, capture_output=True, text=True)
+        subprocess.run(pass2, capture_output=True, text=True)
 
         for ext in (".log", ".log.mbtree"):
             log_file = Path(str(passlog) + "-0" + ext)
@@ -374,70 +354,49 @@ class WRecode(App):
                 log_file.unlink()
 
     def resize_video(self, instance, size):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -vf scale={self.parameters[size].text} {abs_file.stem}_resized{abs_file.suffix}"
-        os.system(command)
+        command = [ffmpeg_path, '-i', file, '-vf', f'scale={self.parameters[size].text}', f'{abs_file.stem}_resized{self.parameters[size].text}{abs_file.suffix}']
+        subprocess.run(command, capture_output=True, text=True)
 
     #Image funcs
     def convert_image(self, instance, format):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} {abs_file.stem}.{self.parameters[format].text}"
-        os.system(command)
+        command = [ffmpeg_path, '-i', file, f'{abs_file.stem}.{self.parameters[format].text}']
+        subprocess.run(command, capture_output=True, text=True)
+
     def resize_image(self, instance, size):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -s {self.parameters[size].text} {abs_file.stem}_resized{abs_file.suffix}"
-        os.system(command)
-        print(command)
+        command = [ffmpeg_path, '-i', file, '-s', f'{self.parameters[size].text}', f'{abs_file.stem}_resized{self.parameters[size].text}{abs_file.suffix}']
+        subprocess.run(command, capture_output=True, text=True)
+
     def compress_image(self, instance, jpeg_parameter):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -q:v {self.parameters[jpeg_parameter].text} {abs_file.stem}_compressed.jpg"
-        os.system(command)
+        command = [ffmpeg_path, '-i', file, '-q:v', f'{self.parameters[jpeg_parameter].text}', f'{abs_file.stem}_compressed.jpg']
+        subprocess.run(command, capture_output=True, text=True)
     #Audio funcs
     def convert_audio(self, instance, format):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        if format == "wav":
-            command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -c:a pcm_s16le {abs_file.name}.{format}" #Несжатый, высокое
-        if format == "mp3":
-            command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -c:a libmp3lame {abs_file.name}.{format}" #Универсальный
-        if format == "flac":
-            command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -c:a flac -compression_level 8 {abs_file.name}.{format}"# Lossless
-        if format == "ogg":
-            command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -c:a libvorbis {abs_file.name}.{format}"
-        if format == "aac":
-            command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -c:a aac {abs_file.name}.{format}"
-        if format == "opus":
-            command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -c:a libopus {abs_file.name}.{format}"
-        if format == "wma":
-            command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -c:a wmav2 {abs_file.name}.{format}"
-        if format == "aiff":
-            command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -c:a pcm_s16be {abs_file.name}.{format}"
-        print("selected format ", format)
-        os.system(command)
+        print(self.parameters[format].text)
+        if self.parameters[format].text == "wav":
+            command = [ffmpeg_path, '-i', file, '-c:a', 'pcm_s16le', f'{abs_file.stem}.{self.parameters[format].text}'] #Несжатый, высокое
+        elif self.parameters[format].text == "mp3":
+            command = [ffmpeg_path, '-i', file, '-c:a', 'libmp3lame', f'{abs_file.stem}.{self.parameters[format].text}']
+        elif self.parameters[format].text == "flac":
+            command = [ffmpeg_path, '-i', file, '-c:a', 'flac', '-compression_level', 8, f'{abs_file.stem}.{self.parameters[format].text}']
+        elif self.parameters[format].text == "ogg":
+            command = [ffmpeg_path, '-i', file, '-c:a', 'libvorbis', f'{abs_file.stem}.{self.parameters[format].text}']
+        elif self.parameters[format].text == "aac":
+            command = [ffmpeg_path, '-i', file, '-c:a', 'aac', f'{abs_file.stem}.{self.parameters[format].text}']
+        elif self.parameters[format].text == "opus":
+            command = [ffmpeg_path, '-i', file, '-c:a', 'libopus', f'{abs_file.stem}.{self.parameters[format].text}']
+        elif self.parameters[format].text == "wma":
+            command = [ffmpeg_path, '-i', file, '-c:a', 'wmav2', f'{abs_file.stem}.{self.parameters[format].text}']
+        elif self.parameters[format].text == "aiff":
+            command = [ffmpeg_path, '-i', file, '-c:a', 'pcm_s16be', f'{abs_file.stem}.{self.parameters[format].text}']
+        else:
+            command = "echo Wrong format"
+        subprocess.run(command, capture_output=True, text=True)
     def change_audio_bitrate(self, instance, bitrate):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -c:a libmp3lame -b:a {self.parameters[bitrate].text}k {abs_file.stem}_compressed.mp3"
-        os.system(command)
+        command = [ffmpeg_path, '-i', file, '-c:a', 'libmp3lame', '-b:a', f'{self.parameters[bitrate].text}k', f'{abs_file.stem}_compressed{self.parameters[bitrate].text}.mp3']
+        subprocess.run(command, capture_output=True, text=True)
     def change_audio_samplerate(self, instance, sample_rate):
-        if " " in str(abs_file.name):
-            print("The file name contains spaces, please remove them.")
-            return
-        command = f"cd /D {os.path.dirname(file)} && {ffmpeg_path} -i {abs_file.name} -ar {self.parameters[sample_rate].text} {abs_file.stem}_{self.parameters[sample_rate].text}.wav"
-        os.system(command)
-
-    def change_file_path(self, instance):
-        abs_file = Path(self.input.text)
+        command = [ffmpeg_path, '-i', file, '-ar', f'{self.parameters[sample_rate].text}', f'{abs_file.stem}_{self.parameters[sample_rate].text}.wav']
+        subprocess.run(command, capture_output=True, text=True)
 
 WRecode().run()
 
