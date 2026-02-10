@@ -257,25 +257,25 @@ class WRecode(App):
         command = [ffmpeg_path, '-i', file, '-b:a' ,f'{self.parameters[bitrate].text}k', f'{abs_file.stem}_audio_compressed_{self.parameters[bitrate].text}{abs_file.suffix}']
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
 
     def change_fps(self, instance, fps):
         command = [ffmpeg_path, '-i', file, '-vf', f'fps={self.parameters[fps].text}', f'{abs_file.stem}_editfps{self.parameters[fps].text}{abs_file.suffix}']
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
 
     def extract_audio(self, instance):
         command = [ffmpeg_path, '-i', file, '-vn', f'{abs_file.stem}_extracted.mp3']
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
 
     def change_bitrate(self, instance, bitrate):
         command = [ffmpeg_path, '-i', file, '-b:v', f'{self.parameters[bitrate].text}k', f'{abs_file.stem}_changed_bitrate{self.parameters[bitrate].text}{abs_file.suffix}']
@@ -284,9 +284,9 @@ class WRecode(App):
         print()
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
 
     def convert_video(self, instance, format):
         command = [ffmpeg_path, '-i', file, '-c', 'copy', f'{abs_file.stem}.{self.parameters[format].text}']
@@ -295,9 +295,9 @@ class WRecode(App):
         print()
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
         
 
     def compress_video_by_size(self, instance, target_size_mb):
@@ -388,10 +388,10 @@ class WRecode(App):
         result1 = subprocess.run(pass1, shell=True)
         result2 = subprocess.run(pass2, shell=True)
         if result1.returncode == 0 and result2.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result1.returncode}")
-            print(f"Ошибка! Код: {result2.returncode}")
+            print(f"Error, code: {result1.returncode}")
+            print(f"Error, code: {result2.returncode}")
         
 
         for ext in (".log", ".log.mbtree"):
@@ -403,34 +403,34 @@ class WRecode(App):
         command = [ffmpeg_path, '-i', file, '-vf', f'scale={self.parameters[size].text}', f'{abs_file.stem}_resized{str(self.parameters[size].text).replace(":","x")}{abs_file.suffix}']
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
 
     #Image funcs
     def convert_image(self, instance, format):
         command = [ffmpeg_path, '-i', file, f'{abs_file.stem}.{self.parameters[format].text}']
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
 
     def resize_image(self, instance, size):
         command = [ffmpeg_path, '-i', file, '-s', f'{self.parameters[size].text}', f'{abs_file.stem}_resized{str(self.parameters[size].text).replace(":","x")}{abs_file.suffix}']
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
 
     def compress_image(self, instance, jpeg_parameter):
         command = [ffmpeg_path, '-i', file, '-q:v', f'{self.parameters[jpeg_parameter].text}', f'{abs_file.stem}_compressed.jpg']
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
     #Audio funcs
     def convert_audio(self, instance, format):
         print(self.parameters[format].text)
@@ -454,23 +454,23 @@ class WRecode(App):
             command = "echo Wrong format"
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
     def change_audio_bitrate(self, instance, bitrate):
         command = [ffmpeg_path, '-i', file, '-c:a', 'libmp3lame', '-b:a', f'{self.parameters[bitrate].text}k', f'{abs_file.stem}_compressed{self.parameters[bitrate].text}.mp3']
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
     def change_audio_samplerate(self, instance, sample_rate):
         command = [ffmpeg_path, '-i', file, '-ar', f'{self.parameters[sample_rate].text}', f'{abs_file.stem}_{self.parameters[sample_rate].text}.wav']
         result = subprocess.run(command, shell=True)
         if result.returncode == 0:
-            print("Успешно!")
+            print("Completed")
         else:
-            print(f"Ошибка! Код: {result.returncode}")
+            print(f"Error, code: {result.returncode}")
 
 WRecode().run()
 
