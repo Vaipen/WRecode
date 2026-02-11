@@ -1,6 +1,6 @@
-# WRecode converter
+# WRecode
 
-Adds ffmpeg conversion with GUI to the context menu for easy and fast media file conversion.
+Adds ffmpeg conversion and compression with GUI to the context menu for easy and fast media manipulation.
 
 ## How to use:
 Make sure you have installed [python](https://www.python.org/downloads/windows) or from Microsoft Store https://apps.microsoft.com/detail/9pnrbtzxmb4z?hl=en-US&gl=US
