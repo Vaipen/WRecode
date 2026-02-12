@@ -5,29 +5,31 @@ var exe_dir : String
 var ffmpeg_path : String
 var ffprobe_path : String
 
-var ffmpeg_pid := -1
+var ffmpeg_pid : int = -1
 var ffmpeg_stdout: FileAccess
-var total_duration := 0.0
+var total_duration : float = 0.0
 signal ffmpeg_finished
 func _ready() -> void:
 	if devmode:
-		exe_dir = r"E:\Godot\Projects\WRecode/"
+		exe_dir = "E:/Godot/Projects/WRecode/"
 	else:
 		exe_dir = OS.get_executable_path().get_base_dir()
 	print("exe_dir: ",exe_dir)
-	ffmpeg_path = str(exe_dir+r"ffmpeg\bin\ffmpeg.exe")
-	ffprobe_path = str(exe_dir+r"ffmpeg\bin\ffprobe.exe")
+	ffmpeg_path = str(exe_dir+"/ffmpeg/bin/ffmpeg.exe")
+	ffprobe_path = str(exe_dir+"/ffmpeg/bin/ffprobe.exe")
 	if FileAccess.file_exists(ffmpeg_path) and FileAccess.file_exists(ffprobe_path):
 		print("ffmpeg: ",ffmpeg_path)
 		print("ffprobe: ",ffprobe_path)
 	else:
+		print(exe_dir)
+		print(ffmpeg_path)
 		push_error("ffmpeg not found")
 		return
 		
 
 
 
-func _process(_delta):
+func _process(_delta) -> void:
 	if ffmpeg_pid == -1:
 		return
 
@@ -37,8 +39,13 @@ func _process(_delta):
 		ffmpeg_finished.emit()
 		return
 
+	read_ffmpeg_output()
+
+func read_ffmpeg_output():
+	if ffmpeg_stdout == null:
+		return
 	while ffmpeg_stdout.get_position() < ffmpeg_stdout.get_length():
-		var line := ffmpeg_stdout.get_line()
+		var line: String = ffmpeg_stdout.get_line()
 		parse_progress(line)
 
 func parse_progress(line: String) -> void:
@@ -91,12 +98,32 @@ func change_bitrate(bitrate:String):
 		print("Error: ",exit_code)
 		
 func convert_video(format:String):
+	print(format)
 	total_duration = get_duration_seconds(main.file_path)
+	if total_duration <= 0.0:
+		push_error("Invalid duration")
+		return
+	if not FileAccess.file_exists(main.file_path):
+		push_error("FILE NOT EXISTS")
+		return
+	if not FileAccess.file_exists(ffmpeg_path):
+		push_error("FILE NOT EXISTS")
+		return
 	var command = ["-i",main.file_path,"-c","copy",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"."+format]
 	print("COMMAND: ",command)
-	var exit_code = OS.execute_with_pipe(ffmpeg_path,command,false)
-	ffmpeg_pid = exit_code.get("pid")
+	var exit_code: Dictionary = OS.execute_with_pipe(ffmpeg_path,command,false)
+	
+	if not exit_code.has("pid"):
+		push_error("FFmpeg failed to start")
+		return
+	
+	ffmpeg_pid = exit_code.get("pid") as int
 	ffmpeg_stdout = exit_code.get("stdout") as FileAccess
+	
+	if ffmpeg_stdout == null:
+		push_error("stdout pipe is null")
+		ffmpeg_pid = -1
+		return
 		
 #func compress_video_by_size(self, instance, target_size_mb):
 	#if " " in str(abs_file.name):
@@ -336,6 +363,7 @@ func get_duration_seconds(path: String) -> float:
 	)
 
 	if code != 0 or output.is_empty():
+		push_error("ffprobe failed")
 		return 0.0
 
 	return output[0].strip_edges().to_float()

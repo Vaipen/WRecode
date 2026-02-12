@@ -415,6 +415,7 @@ text = "Process [file.___] | output | timings"
 
 [node name="ffmpeg funcs" type="Node" parent="." unique_id=1611590948]
 script = ExtResource("9_4c57u")
+devmode = true
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Header/FilePath" to="." method="_select_file_pressed"]
 [connection signal="file_selected" from="MarginContainer/VBoxContainer/Header/FilePath/FileDialog" to="." method="_on_file_selected"]

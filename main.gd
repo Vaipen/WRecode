@@ -26,7 +26,7 @@ func _convert_pressed() -> void:
 
 
 func _compress_pressed() -> void:
-	show_windows_notification("Compressing done","Succesfyllu")
+	pass
 
 
 func _editfps_pressed() -> void:
@@ -71,3 +71,7 @@ func show_windows_notification(title: String, message: String):
 
 func _on_options_close_requested() -> void:
 	$MarginContainer/VBoxContainer/Bottom/Settings/Window.hide()
+
+
+func _on_ffmpeg_funcs_ffmpeg_finished() -> void:
+	show_windows_notification("FFmpeg","Done")
