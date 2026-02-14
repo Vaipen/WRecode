@@ -3,6 +3,7 @@
 [ext_resource type="Theme" uid="uid://bp7665k4n8m6y" path="res://Theme.tres" id="1_5vw27"]
 [ext_resource type="Script" uid="uid://x0eq5slua18f" path="res://main.gd" id="2_kek77"]
 [ext_resource type="FontFile" uid="uid://dixajpvoymgfu" path="res://fonts/Inter/static/Inter_28pt-Black.ttf" id="3_kek77"]
+[ext_resource type="Script" uid="uid://dujpkwobstyka" path="res://theme_manager.gd" id="3_w48qg"]
 [ext_resource type="Texture2D" uid="uid://0dt3n4vayuub" path="res://ui/icons/input_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="4_dg77c"]
 [ext_resource type="Texture2D" uid="uid://qs3vg3syltwg" path="res://ui/icons/sync_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="5_ycdy4"]
 [ext_resource type="Texture2D" uid="uid://omaj78edswis" path="res://ui/icons/photo_size_select_large_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="6_w48qg"]
@@ -12,6 +13,83 @@
 [ext_resource type="Texture2D" uid="uid://de1fyc4roknvy" path="res://ui/icons/10k_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="9_yaehf"]
 [ext_resource type="Texture2D" uid="uid://cdw66c3jj7a4n" path="res://ui/icons/movie_speaker_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="10_074og"]
 [ext_resource type="Texture2D" uid="uid://bslul8khaenh8" path="res://ui/icons/settings_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="11_cegan"]
+[ext_resource type="FontFile" uid="uid://dui1ku3uixrt6" path="res://fonts/Martian_Mono/static/MartianMono-Light.ttf" id="11_ycdy4"]
+
+[sub_resource type="Shader" id="Shader_ycdy4"]
+code = "shader_type canvas_item;
+uniform float u_speed = 1.0; 
+
+uniform vec4 u_color_low : source_color = vec4(0.01, 0.41, 0.51, 1.0); 
+uniform vec4 u_color_mid_red : source_color = vec4(.50, 0.10, 0.30, 1.0); 
+uniform vec4 u_color_high : source_color = vec4(1.0, 1.0, 1.0, 1.0); 
+
+
+
+#define iTime (TIME * u_speed)
+#define iResolution 1.0/SCREEN_PIXEL_SIZE
+
+const mat2 mtx = mat2( vec2(0.80, -0.60), vec2(0.60, 0.80) );
+
+float rand(vec2 n) { 
+    return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
+float noise(vec2 p){
+    vec2 ip = floor(p);
+    vec2 u = fract(p);
+    u = u * u * (3.0 - 2.0 * u);
+
+    float res = mix(
+        mix(rand(ip), rand(ip + vec2(1.0, 0.0)), u.x),
+        mix(rand(ip + vec2(0.0, 1.0)), rand(ip + vec2(1.0, 1.0)), u.x), u.y);
+        
+    return res * res;
+}
+
+float fbm( vec2 p )
+{
+    float f = 0.0;
+    
+    f += 0.500000 * noise( p + iTime ); p = mtx * p * 2.02;
+    f += 0.031250 * noise( p ); p = mtx * p * 2.01;
+    f += 0.250000 * noise( p ); p = mtx * p * 2.03;
+    f += 0.125000 * noise( p ); p = mtx * p * 2.01;
+    f += 0.062500 * noise( p ); p = mtx * p * 2.04;
+    f += 0.015625 * noise( p + sin(iTime) );
+
+    return f / 0.96875;
+}
+
+float pattern( in vec2 p )
+{
+	return fbm( p + fbm( p + fbm( p ) ) );
+}
+
+vec4 colormap(float x) {
+    
+    if (x < 0.24) { 
+        return mix(u_color_low, u_color_mid_red, x / 0.24);
+    } 
+    else { 
+        return mix(u_color_mid_red, u_color_high, (x - 0.24) / 0.76);
+    }
+}
+
+void fragment()
+{
+    vec2 screen_size = 1.0 / SCREEN_PIXEL_SIZE;
+    vec2 uv = FRAGCOORD.xy / screen_size.x; 
+   	float shade = pattern(uv);
+    
+    COLOR = colormap(shade);
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_w48qg"]
+shader = SubResource("Shader_ycdy4")
+shader_parameter/u_speed = 0.2
+shader_parameter/u_color_low = Color(0.22352941, 0.24313726, 0.25490198, 1)
+shader_parameter/u_color_mid_red = Color(0.9137255, 0.30980393, 0.21568628, 1)
+shader_parameter/u_color_high = Color(0.9647059, 0.96862745, 0.92156863, 1)
 
 [node name="Main" type="Control" unique_id=608843615 node_paths=PackedStringArray("input_file_path", "convert_format_option")]
 layout_mode = 3
@@ -25,7 +103,11 @@ script = ExtResource("2_kek77")
 input_file_path = NodePath("MarginContainer/VBoxContainer/Header/FilePath")
 convert_format_option = NodePath("MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert/Option")
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=624037857]
+[node name="theme_manager" type="Node" parent="." unique_id=1271371070]
+script = ExtResource("3_w48qg")
+
+[node name="Background" type="ColorRect" parent="." unique_id=624037857]
+material = SubResource("ShaderMaterial_w48qg")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -65,6 +147,7 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 24
 text = "C:/___/______.___"
 alignment = 0
+clip_text = true
 
 [node name="FileDialog" type="FileDialog" parent="MarginContainer/VBoxContainer/Header/FilePath" unique_id=1862728207]
 oversampling_override = 1.0
@@ -287,15 +370,25 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Advanced mode"
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom" unique_id=73827196]
+[node name="Progress" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Bottom" unique_id=1811480562]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 8
-theme_override_fonts/font = ExtResource("3_kek77")
-theme_override_font_sizes/font_size = 16
-text = "WRecode"
+
+[node name="progressbar" type="ProgressBar" parent="MarginContainer/VBoxContainer/Bottom/Progress" unique_id=97581318]
+layout_mode = 2
+step = 1.0
+rounded = true
+
+[node name="progressinfo" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Progress" unique_id=73827196]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 10
+theme_override_fonts/font = ExtResource("11_ycdy4")
+theme_override_font_sizes/font_size = 15
+text = "WRecode "
 horizontal_alignment = 1
 vertical_alignment = 2
+clip_text = true
 
 [node name="Settings" type="Button" parent="MarginContainer/VBoxContainer/Bottom" unique_id=1422985031]
 layout_mode = 2
@@ -378,43 +471,9 @@ text = "Language"
 [node name="OptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1309694471]
 layout_mode = 2
 
-[node name="ProgressBar" type="Panel" parent="." unique_id=165824987]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -350.0
-offset_top = 83.0
-offset_right = 350.0
-offset_bottom = 183.0
-grow_horizontal = 2
-grow_vertical = 2
-pivot_offset = Vector2(350, 50)
-
-[node name="MarginContainer" type="MarginContainer" parent="ProgressBar" unique_id=1766004024]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="ProgressBar/MarginContainer" unique_id=197075137]
-layout_mode = 2
-
-[node name="ProgressBar" type="ProgressBar" parent="ProgressBar/MarginContainer/VBoxContainer" unique_id=2103768862]
-layout_mode = 2
-size_flags_vertical = 2
-
-[node name="Label" type="Label" parent="ProgressBar/MarginContainer/VBoxContainer" unique_id=239194556]
-layout_mode = 2
-text = "Process [file.___] | output | timings"
-
 [node name="ffmpeg funcs" type="Node" parent="." unique_id=1611590948]
 script = ExtResource("9_4c57u")
+devmode = true
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Header/FilePath" to="." method="_select_file_pressed"]
 [connection signal="file_selected" from="MarginContainer/VBoxContainer/Header/FilePath/FileDialog" to="." method="_on_file_selected"]
@@ -422,6 +481,8 @@ script = ExtResource("9_4c57u")
 [connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel/Compress/Function" to="." method="_compress_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2/Edit FPS/Function" to="." method="_editfps_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel3/Extract Audio/Function" to="." method="_extractaudio_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel4/Change bitrate/Function" to="." method="_changebitrate_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Bottom/Settings" to="." method="_on_settings_pressed"]
 [connection signal="close_requested" from="MarginContainer/VBoxContainer/Bottom/Settings/Window" to="." method="_on_options_close_requested"]
 [connection signal="ffmpeg_finished" from="ffmpeg funcs" to="." method="_on_ffmpeg_funcs_ffmpeg_finished"]
+[connection signal="ffmpeg_started" from="ffmpeg funcs" to="." method="_on_ffmpeg_funcs_ffmpeg_started"]

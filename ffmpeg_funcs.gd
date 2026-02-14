@@ -4,10 +4,20 @@ extends Node
 var exe_dir : String
 var ffmpeg_path : String
 var ffprobe_path : String
-
 var ffmpeg_pid : int = -1
 var ffmpeg_stdout: FileAccess
 var total_duration : float = 0.0
+#ffmpeg stdout
+var progress : float = 0.0
+var fps: float = 0.0
+var speed:float=0.0
+var bitrate:String="0"
+var current_time:float = 0.0
+var eta : float =0.0
+var formated_eta : String = "00:00:00"
+
+#
+signal ffmpeg_started
 signal ffmpeg_finished
 func _ready() -> void:
 	if devmode:
@@ -32,37 +42,59 @@ func _ready() -> void:
 func _process(_delta) -> void:
 	if ffmpeg_pid == -1:
 		return
-
+	read_ffmpeg_output()
 	if not OS.is_process_running(ffmpeg_pid):
 		print("FFmpeg finished")
 		ffmpeg_pid = -1
 		ffmpeg_finished.emit()
 		return
 
-	read_ffmpeg_output()
-
-func read_ffmpeg_output():
+func read_ffmpeg_output() -> void:
 	if ffmpeg_stdout == null:
 		return
-	while ffmpeg_stdout.get_position() < ffmpeg_stdout.get_length():
+	while not ffmpeg_stdout.eof_reached():
 		var line: String = ffmpeg_stdout.get_line()
+		if line == "":
+			break
 		parse_progress(line)
 
 func parse_progress(line: String) -> void:
-	if not line.begins_with("out_time_ms="):
-		return
+	if line.begins_with("fps="):
+		fps = line.get_slice("=",1).to_float()
+	elif line.begins_with("speed="):
+		var s: String = line.get_slice("=",1).strip_edges()
+		print("SPEED:", s)
+		s = s.replace("x", "")
+		speed = s.to_float()
+	elif line.begins_with("bitrate="):
+		bitrate = line.get_slice("=",1).strip_edges()
+	elif line.begins_with("out_time_ms="):
+		var ms_str: String = line.get_slice("=", 1)
+		var ms: float = ms_str.to_float()
 
-	var ms_str: String = line.get_slice("=", 1)
-	var ms: float = ms_str.to_float()
-
-	var seconds: float = ms / 1_000_000.0
-	var progress: float = clamp(seconds / total_duration, 0.0, 1.0)
-
-	print("Progress:", int(progress * 100), "%")
+		current_time = ms / 1_000_000.0
+		var est_progress: float = clamp(current_time / total_duration, 0.0, 1.0)
+		progress = est_progress * 100.0
 		
+		if speed > 0.0:
+			eta = (total_duration - current_time) / speed
+			formated_eta = format_time(eta)
+			
+func format_time(seconds: float) -> String:
+	if seconds <= 0.0:
+		return "00:00:00"
+		
+	var total: int = int(seconds)
+	
+	var h: int = total / 3600
+	var m: int = (total%3600) / 60
+	var s: int = total % 60
+	
+	return "%02d:%02d:%02d" % [h,m,s]
+
 #region Video functions
 func change_audio_bitrate_in_video(bitrate: String):
-	var command = ["-i",main.file_path,"-b:a",bitrate+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_audio_compressed"+bitrate+"k "+"."+main.file_path.get_extension()]
+	var command = ['-progress','pipe:1',"-i",main.file_path,"-b:a",bitrate+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_audio_compressed"+bitrate+"k "+"."+main.file_path.get_extension()]
 	var output := []
 	var exit_code = OS.execute(ffmpeg_path,command,output, true)
 	if exit_code == 0:
@@ -89,16 +121,34 @@ func extract_audio():
 		print("Error: ",exit_code)
 
 func change_bitrate(bitrate:String):
-	var command = ["-i",main.file_path,"-b:v",bitrate+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_"+bitrate+"k"+"."+main.file_path.get_extension()]
-	var output := []
-	var exit_code = OS.execute(ffmpeg_path,command,output, true)
-	if exit_code == 0:
-		print("Output FFmpeg: ",output)
-	else:
-		print("Error: ",exit_code)
+	ffmpeg_started.emit()
+	total_duration = get_duration_seconds(main.file_path)
+	if total_duration <= 0.0:
+		push_error("Invalid duration")
+		return
+	if not FileAccess.file_exists(main.file_path):
+		push_error("FILE NOT EXISTS")
+		return
+	if not FileAccess.file_exists(ffmpeg_path):
+		push_error("FILE NOT EXISTS")
+		return
+		
+	var command = ['-progress','pipe:1',"-i",main.file_path,"-b:v",bitrate+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_"+bitrate+"."+main.file_path.get_extension()]
+	var exit_code: Dictionary = OS.execute_with_pipe(ffmpeg_path,command,false)
+	
+	if not exit_code.has("pid"):
+		push_error("FFmpeg failed to start")
+		return
+	
+	ffmpeg_pid = exit_code.get("pid") as int
+	ffmpeg_stdout = exit_code.get("stdio")
+	
+	if ffmpeg_stdout == null:
+		push_error("stdout pipe is null")
+		ffmpeg_pid = -1
+		return
 		
 func convert_video(format:String):
-	print(format)
 	total_duration = get_duration_seconds(main.file_path)
 	if total_duration <= 0.0:
 		push_error("Invalid duration")
@@ -118,7 +168,7 @@ func convert_video(format:String):
 		return
 	
 	ffmpeg_pid = exit_code.get("pid") as int
-	ffmpeg_stdout = exit_code.get("stdout") as FileAccess
+	ffmpeg_stdout = exit_code.get("stdio") as FileAccess
 	
 	if ffmpeg_stdout == null:
 		push_error("stdout pipe is null")

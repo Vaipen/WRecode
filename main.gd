@@ -4,6 +4,9 @@ var file_path : String
 @export var input_file_path : Button
 @export var convert_format_option : OptionButton
 @onready var ffmpeg: Node = $"ffmpeg funcs"
+@onready var progressbar: ProgressBar = $MarginContainer/VBoxContainer/Bottom/Progress/progressbar
+@onready var progressinfo: Label = $MarginContainer/VBoxContainer/Bottom/Progress/progressinfo
+var run : bool = false
 
 
 var file_types = {
@@ -19,7 +22,11 @@ func _ready() -> void:
 		print("Args: ", file_path)
 	else:
 		push_error("Invalid file path")
-	
+
+func _process(_delta: float) -> void:
+	if run:
+		progressbar.value = ffmpeg.progress
+		progressinfo.text = "FPS="+str(ffmpeg.fps)+" Bitrate="+str(ffmpeg.bitrate)+" ETA:"+ffmpeg.formated_eta
 
 func _convert_pressed() -> void:
 	ffmpeg.convert_video($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert/Option.get_item_text($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert/Option.get_selected_id()))
@@ -36,25 +43,21 @@ func _editfps_pressed() -> void:
 func _extractaudio_pressed() -> void:
 	ffmpeg.change_audio_bitrate_in_video(1000)
 
-
+func _changebitrate_pressed() -> void:
+	ffmpeg.change_bitrate($"MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel4/Change bitrate/Option".text)
+	
 func _select_file_pressed() -> void:
 	$MarginContainer/VBoxContainer/Header/FilePath/FileDialog.show()
 func _on_file_selected(path: String) -> void:
 	_update_inputfile(path)
-
 func _update_inputfile(path: String) -> void:
 	file_path = path
 	input_file_path.text = path
 	print("File selected: ", path)
 	for i in file_types["video"]:
 		convert_format_option.add_item(i)
-
-
 func _on_settings_pressed() -> void:
 	$MarginContainer/VBoxContainer/Bottom/Settings/Window.show()
-
-
-
 func show_windows_notification(title: String, message: String):
 	var command = "powershell"
 	var args = [
@@ -67,11 +70,17 @@ func show_windows_notification(title: String, message: String):
 	
 	if exit_code != 0:
 		push_error("Failed to show notification")
-
-
 func _on_options_close_requested() -> void:
 	$MarginContainer/VBoxContainer/Bottom/Settings/Window.hide()
 
 
 func _on_ffmpeg_funcs_ffmpeg_finished() -> void:
+	run = false
 	show_windows_notification("FFmpeg","Done")
+	progressinfo.text = "WRecode"
+	create_tween().tween_property($Background.material,"shader_parameter/u_speed",0.2,1)
+
+
+func _on_ffmpeg_funcs_ffmpeg_started() -> void:
+	run = true
+	create_tween().tween_property($Background.material,"shader_parameter/u_speed",2.0,1)
