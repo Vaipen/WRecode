@@ -63,7 +63,6 @@ func parse_progress(line: String) -> void:
 		fps = line.get_slice("=",1).to_float()
 	elif line.begins_with("speed="):
 		var s: String = line.get_slice("=",1).strip_edges()
-		print("SPEED:", s)
 		s = s.replace("x", "")
 		speed = s.to_float()
 	elif line.begins_with("bitrate="):
@@ -87,40 +86,13 @@ func format_time(seconds: float) -> String:
 	var total: int = int(seconds)
 	
 	var h: int = total / 3600
-	var m: int = (total%3600) / 60
+	var m: int = (total % 3600) / 60
 	var s: int = total % 60
 	
 	return "%02d:%02d:%02d" % [h,m,s]
 
 #region Video functions
-func change_audio_bitrate_in_video(bitrate: String):
-	var command = ['-progress','pipe:1',"-i",main.file_path,"-b:a",bitrate+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_audio_compressed"+bitrate+"k "+"."+main.file_path.get_extension()]
-	var output := []
-	var exit_code = OS.execute(ffmpeg_path,command,output, true)
-	if exit_code == 0:
-		print("Output FFmpeg: ",output)
-	else:
-		print("Error: ",exit_code)
-
-func change_fps(fps : String):
-	var command = ["-i",main.file_path,"-vf","fps="+fps,main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_"+fps+"fps"+"."+main.file_path.get_extension()]
-	var output := []
-	var exit_code = OS.execute(ffmpeg_path,command,output, true)
-	if exit_code == 0:
-		print("Output FFmpeg: ",output)
-	else:
-		print("Error: ",exit_code)
-
-func extract_audio():
-	var command = ["-i",main.file_path,"-vn",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_extracted.mp3"]
-	var output := []
-	var exit_code = OS.execute(ffmpeg_path,command,output, true)
-	if exit_code == 0:
-		print("Output FFmpeg: ",output)
-	else:
-		print("Error: ",exit_code)
-
-func change_bitrate(bitrate:String):
+func change_audio_bitrate_in_video(bitratee: String):
 	ffmpeg_started.emit()
 	total_duration = get_duration_seconds(main.file_path)
 	if total_duration <= 0.0:
@@ -133,22 +105,66 @@ func change_bitrate(bitrate:String):
 		push_error("FILE NOT EXISTS")
 		return
 		
-	var command = ['-progress','pipe:1',"-i",main.file_path,"-b:v",bitrate+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_"+bitrate+"."+main.file_path.get_extension()]
+	var command = ['-progress','pipe:1',"-i",main.file_path,"-b:a",bitratee+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_audio_compressed"+bitratee+"k "+"."+main.file_path.get_extension()]
 	var exit_code: Dictionary = OS.execute_with_pipe(ffmpeg_path,command,false)
 	
-	if not exit_code.has("pid"):
-		push_error("FFmpeg failed to start")
+	set_stdout(exit_code)
+
+func change_fps(fpss : String):
+	ffmpeg_started.emit()
+	total_duration = get_duration_seconds(main.file_path)
+	if total_duration <= 0.0:
+		push_error("Invalid duration")
 		return
+	if not FileAccess.file_exists(main.file_path):
+		push_error("FILE NOT EXISTS")
+		return
+	if not FileAccess.file_exists(ffmpeg_path):
+		push_error("FILE NOT EXISTS")
+		return
+	var command = ["-i",main.file_path,"-vf","fps="+fpss,main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_"+fpss+"fps"+"."+main.file_path.get_extension()]
+	var exit_code: Dictionary = OS.execute_with_pipe(ffmpeg_path,command,false)
 	
-	ffmpeg_pid = exit_code.get("pid") as int
-	ffmpeg_stdout = exit_code.get("stdio")
-	
-	if ffmpeg_stdout == null:
-		push_error("stdout pipe is null")
-		ffmpeg_pid = -1
+	set_stdout(exit_code)
+
+func extract_audio():
+	ffmpeg_started.emit()
+	total_duration = get_duration_seconds(main.file_path)
+	if total_duration <= 0.0:
+		push_error("Invalid duration")
+		return
+	if not FileAccess.file_exists(main.file_path):
+		push_error("FILE NOT EXISTS")
+		return
+	if not FileAccess.file_exists(ffmpeg_path):
+		push_error("FILE NOT EXISTS")
 		return
 		
+	var command = ["-i",main.file_path,"-vn",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_extracted.mp3"]
+	var exit_code: Dictionary = OS.execute_with_pipe(ffmpeg_path,command,false)
+	
+	set_stdout(exit_code)
+
+func change_bitrate(bitratee:String):
+	ffmpeg_started.emit()
+	total_duration = get_duration_seconds(main.file_path)
+	if total_duration <= 0.0:
+		push_error("Invalid duration")
+		return
+	if not FileAccess.file_exists(main.file_path):
+		push_error("FILE NOT EXISTS")
+		return
+	if not FileAccess.file_exists(ffmpeg_path):
+		push_error("FILE NOT EXISTS")
+		return
+		
+	var command = ['-progress','pipe:1',"-i",main.file_path,"-b:v",bitratee+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_"+bitratee+"."+main.file_path.get_extension()]
+	var exit_code: Dictionary = OS.execute_with_pipe(ffmpeg_path,command,false)
+	
+	set_stdout(exit_code)
+		
 func convert_video(format:String):
+	ffmpeg_started.emit()
 	total_duration = get_duration_seconds(main.file_path)
 	if total_duration <= 0.0:
 		push_error("Invalid duration")
@@ -163,17 +179,7 @@ func convert_video(format:String):
 	print("COMMAND: ",command)
 	var exit_code: Dictionary = OS.execute_with_pipe(ffmpeg_path,command,false)
 	
-	if not exit_code.has("pid"):
-		push_error("FFmpeg failed to start")
-		return
-	
-	ffmpeg_pid = exit_code.get("pid") as int
-	ffmpeg_stdout = exit_code.get("stdio") as FileAccess
-	
-	if ffmpeg_stdout == null:
-		push_error("stdout pipe is null")
-		ffmpeg_pid = -1
-		return
+	set_stdout(exit_code)
 		
 #func compress_video_by_size(self, instance, target_size_mb):
 	#if " " in str(abs_file.name):
@@ -273,131 +279,100 @@ func convert_video(format:String):
 			#log_file.unlink()
 
 func resize_video(x:String,y:String):
+	ffmpeg_started.emit()
+	total_duration = get_duration_seconds(main.file_path)
+	if total_duration <= 0.0:
+		push_error("Invalid duration")
+		return
+	if not FileAccess.file_exists(main.file_path):
+		push_error("FILE NOT EXISTS")
+		return
+	if not FileAccess.file_exists(ffmpeg_path):
+		push_error("FILE NOT EXISTS")
+		return
 	var command = ["-i",main.file_path,"-vf","scale="+x+":"+y,main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_"+x+"x"+y+"."+main.file_path.get_extension()]
-	var output := []
-	var exit_code = OS.execute(ffmpeg_path,command,output, true)
-	if exit_code == 0:
-		print("Output FFmpeg: ",output)
-	else:
-		print("Error: ",exit_code)
+	var exit_code: Dictionary = OS.execute_with_pipe(ffmpeg_path,command,false)
+	
+	set_stdout(exit_code)
 #endregion
 
 #region Image functions
 func convert_image(format:String):
+	ffmpeg_started.emit()
+	if not FileAccess.file_exists(main.file_path):
+		push_error("FILE NOT EXISTS")
+		return
+	if not FileAccess.file_exists(ffmpeg_path):
+		push_error("FILE NOT EXISTS")
+		return
 	var command = ["-i",main.file_path,main.file_path.get_file().get_basename()+"."+format]
-	var output := []
-	var exit_code = OS.execute(ffmpeg_path,command,output, true)
-	if exit_code == 0:
-		print("Output FFmpeg: ",output)
-	else:
-		print("Error: ",exit_code)
+	OS.execute_with_pipe(ffmpeg_path,command,false)
+	
 
 func resize_image(x:String,y:String):
+	ffmpeg_started.emit()
+	if not FileAccess.file_exists(main.file_path):
+		push_error("FILE NOT EXISTS")
+		return
+	if not FileAccess.file_exists(ffmpeg_path):
+		push_error("FILE NOT EXISTS")
+		return
 	var command = ["-i",main.file_path,"-s",x+":"+y,main.file_path.get_file().get_basename()+"_"+x+":"+y+"."+main.file_path.get_extension()]
-	var output := []
-	var exit_code = OS.execute(ffmpeg_path,command,output, true)
-	if exit_code == 0:
-		print("Output FFmpeg: ",output)
-	else:
-		print("Error: ",exit_code)
+	OS.execute_with_pipe(ffmpeg_path,command,false)
 
 func compress_image(jpeg_quality:String,compression_level : String):
+	ffmpeg_started.emit()
+	if not FileAccess.file_exists(main.file_path):
+		push_error("FILE NOT EXISTS")
+		return
+	if not FileAccess.file_exists(ffmpeg_path):
+		push_error("FILE NOT EXISTS")
+		return
 	var command = ["-i",main.file_path,"-q:v",jpeg_quality,"-compression_level",compression_level,"-huffman","default","-vf", "format=yuvj420p",main.file_path.get_file().get_basename()+".jpg"]
-	var output := []
-	var exit_code = OS.execute(ffmpeg_path,command,output, true)
-	if exit_code == 0:
-		print("Output FFmpeg: ",output)
-	else:
-		print("Error: ",exit_code)
+	OS.execute_with_pipe(ffmpeg_path,command,false)
+
 #endregion
 
-#Audio funcs
+#region Audio funcs
 func convert_audio(format):
+	
 	if format == "wav":
 #Несжатый, высокое
 		var command = ["-i",main.file_path,"-c:a","pcm_s16le",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"."+format]
-		var output := []
-		var exit_code = OS.execute(ffmpeg_path,command,output, true)
-		if exit_code == 0:
-			print("Output FFmpeg: ",output)
-		else:
-			print("Error: ",exit_code)
+		OS.execute_with_pipe(ffmpeg_path,command,false)
 	elif format == "mp3":
 #Универсальный
 		var command = ["-i",main.file_path,"-c:a","libmp3lame",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"."+format]
-		var output := []
-		var exit_code = OS.execute(ffmpeg_path,command,output, true)
-		if exit_code == 0:
-			print("Output FFmpeg: ",output)
-		else:
-			print("Error: ",exit_code)
+		OS.execute_with_pipe(ffmpeg_path,command,false)
+
 	elif format == "flac":
 # Lossless
 		var command = ["-i",main.file_path,"-c:a","flac",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"."+format]
-		var output := []
-		var exit_code = OS.execute(ffmpeg_path,command,output, true)
-		if exit_code == 0:
-			print("Output FFmpeg: ",output)
-		else:
-			print("Error: ",exit_code)
+		OS.execute_with_pipe(ffmpeg_path,command,false)
 	elif format == "ogg":
 		var command = ["-i",main.file_path,"-c:a","libvorbis",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"."+format]
-		var output := []
-		var exit_code = OS.execute(ffmpeg_path,command,output, true)
-		if exit_code == 0:
-			print("Output FFmpeg: ",output)
-		else:
-			print("Error: ",exit_code)
+		OS.execute_with_pipe(ffmpeg_path,command,false)
 	elif format == "aac":
 		var command = ["-i",main.file_path,"-c:a","aac",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"."+format]
-		var output := []
-		var exit_code = OS.execute(ffmpeg_path,command,output, true)
-		if exit_code == 0:
-			print("Output FFmpeg: ",output)
-		else:
-			print("Error: ",exit_code)
+		OS.execute_with_pipe(ffmpeg_path,command,false)
 	elif format == "opus":
 		var command = ["-i",main.file_path,"-c:a","libopus",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"."+format]
-		var output := []
-		var exit_code = OS.execute(ffmpeg_path,command,output, true)
-		if exit_code == 0:
-			print("Output FFmpeg: ",output)
-		else:
-			print("Error: ",exit_code)
+		OS.execute_with_pipe(ffmpeg_path,command,false)
 	elif format == "wma":
 		var command = ["-i",main.file_path,"-c:a","wmav2",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"."+format]
-		var output := []
-		var exit_code = OS.execute(ffmpeg_path,command,output, true)
-		if exit_code == 0:
-			print("Output FFmpeg: ",output)
-		else:
-			print("Error: ",exit_code)
+		OS.execute_with_pipe(ffmpeg_path,command,false)
 	elif format == "aiff":
 		var command = ["-i",main.file_path,"-c:a","pcm_s16be",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"."+format]
-		var output := []
-		var exit_code = OS.execute(ffmpeg_path,command,output, true)
-		if exit_code == 0:
-			print("Output FFmpeg: ",output)
-		else:
-			print("Error: ",exit_code)
+		OS.execute_with_pipe(ffmpeg_path,command,false)
 
-func change_audio_bitrate(bitrate):
-	var command = ["-i",main.file_path,"-c:a","libmp3lame","-b:a",bitrate+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+bitrate+"k"+".mp3"]
-	var output := []
-	var exit_code = OS.execute(ffmpeg_path,command,output, true)
-	if exit_code == 0:
-		print("Output FFmpeg: ",output)
-	else:
-		print("Error: ",exit_code)
+func change_audio_bitrate(bitratee):
+	var command = ["-i",main.file_path,"-c:a","libmp3lame","-b:a",bitratee+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+bitrate+"k"+".mp3"]
+	OS.execute_with_pipe(ffmpeg_path,command,false)
 func change_audio_samplerate(sample_rate):
 	var command = ["-i",main.file_path,"-ar",sample_rate,main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+sample_rate+".wav"]
-	var output := []
-	var exit_code = OS.execute(ffmpeg_path,command,output, true)
-	if exit_code == 0:
-		print("Output FFmpeg: ",output)
-	else:
-		print("Error: ",exit_code)
+	OS.execute_with_pipe(ffmpeg_path,command,false)
 
+#endregion
 func get_duration_seconds(path: String) -> float:
 	var output: Array[String] = []
 	var code: int = OS.execute(
@@ -417,3 +392,16 @@ func get_duration_seconds(path: String) -> float:
 		return 0.0
 
 	return output[0].strip_edges().to_float()
+
+func set_stdout(exit_code):
+	if not exit_code.has("pid"):
+		push_error("FFmpeg failed to start")
+		return
+	
+	ffmpeg_pid = exit_code.get("pid") as int
+	ffmpeg_stdout = exit_code.get("stdio")
+	
+	if ffmpeg_stdout == null:
+		push_error("stdout pipe is null")
+		ffmpeg_pid = -1
+		return

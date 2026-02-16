@@ -1,9 +1,9 @@
 [gd_resource type="Theme" format=4 uid="uid://bp7665k4n8m6y"]
 
-[ext_resource type="StyleBox" uid="uid://bikosrwmbguk2" path="res://ui/Marathon/Button/Hover.tres" id="1_k1aya"]
+[ext_resource type="StyleBox" uid="uid://bikosrwmbguk2" path="res://ui/WRecodeTheme/Button/Hover.tres" id="1_05tig"]
 [ext_resource type="FontFile" uid="uid://cotq4fpa81v71" path="res://fonts/Martian_Mono/static/MartianMono-Medium.ttf" id="1_yd3fu"]
-[ext_resource type="StyleBox" uid="uid://dcifr26xnuhte" path="res://ui/Marathon/Button/Normal.tres" id="2_j4jqe"]
-[ext_resource type="StyleBox" uid="uid://c8bt2plf8quoq" path="res://ui/Marathon/Button/Pressed.tres" id="3_j4jqe"]
+[ext_resource type="StyleBox" uid="uid://dcifr26xnuhte" path="res://ui/WRecodeTheme/Button/Normal.tres" id="2_1rmny"]
+[ext_resource type="StyleBox" uid="uid://c8bt2plf8quoq" path="res://ui/WRecodeTheme/Button/Pressed.tres" id="3_mihib"]
 [ext_resource type="Texture2D" uid="uid://ce56o2qyibecv" path="res://ui/icons/arrow_drop_down_64dp_E3E3E3_FILL0_wght400_GRAD0_opsz48.svg" id="4_c6xh3"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_23v3e"]
@@ -156,6 +156,8 @@ _source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\">
 [sub_resource type="DPITexture" id="DPITexture_ait1g"]
 _source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"#b2b2b2\" d=\"M8 2C5.443 2 2.209 3.948 1.045 7.705a1 1 0 0 0 0 .55C2.163 12.211 5.5 14 8 14s5.836-1.789 6.961-5.725a1 1 0 0 0 0-.55C13.861 3.935 10.554 2 8 2zm0 2a4 4 0 0 1 0 8 4 4 0 0 1 0-8zm0 2a2 2 0 0 0 0 4 2 2 0 0 0 0-4z\"/></svg>
 "
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yin2u"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x4ehi"]
 
@@ -1902,6 +1904,8 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 corner_detail = 6
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ttqs8"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j4jqe"]
 content_margin_left = 4.0
 content_margin_top = 4.0
@@ -1947,9 +1951,9 @@ Button/constants/align_to_largest_stylebox = 0
 Button/constants/icon_max_width = 0
 Button/constants/outline_size = 0
 Button/styles/disabled = SubResource("StyleBoxFlat_23v3e")
-Button/styles/hover = ExtResource("1_k1aya")
-Button/styles/normal = ExtResource("2_j4jqe")
-Button/styles/pressed = ExtResource("3_j4jqe")
+Button/styles/hover = ExtResource("1_05tig")
+Button/styles/normal = ExtResource("2_1rmny")
+Button/styles/pressed = ExtResource("3_mihib")
 CheckBox/colors/checkbox_checked_color = Color(1, 1, 1, 1)
 CheckBox/colors/checkbox_unchecked_color = Color(1, 1, 1, 1)
 CheckBox/colors/font_color = Color(0.875, 0.875, 0.875, 1)
@@ -2000,6 +2004,8 @@ FileDialog/icons/sort = SubResource("DPITexture_8h23u")
 FileDialog/icons/thumbnail_mode = SubResource("DPITexture_ot3ra")
 FileDialog/icons/toggle_filename_filter = SubResource("DPITexture_ebghh")
 FileDialog/icons/toggle_hidden = SubResource("DPITexture_ait1g")
+HSeparator/constants/separation = 4
+HSeparator/styles/separator = SubResource("StyleBoxEmpty_yin2u")
 Label/colors/font_color = Color(1, 1, 1, 1)
 Label/colors/font_outline_color = Color(0, 0, 0, 1)
 Label/colors/font_shadow_color = Color(0, 0, 0, 0)
@@ -2085,14 +2091,16 @@ PopupMenu/icons/unchecked_disabled = SubResource("DPITexture_yc1e8")
 PopupMenu/styles/hover = SubResource("StyleBoxFlat_yqqs6")
 PopupMenu/styles/labeled_separator_left = SubResource("StyleBoxLine_ymdfq")
 PopupMenu/styles/labeled_separator_right = SubResource("StyleBoxLine_ymdfq")
-PopupMenu/styles/panel = ExtResource("2_j4jqe")
+PopupMenu/styles/panel = ExtResource("2_1rmny")
 PopupMenu/styles/separator = SubResource("StyleBoxLine_ymdfq")
-PopupPanel/styles/panel = ExtResource("2_j4jqe")
+PopupPanel/styles/panel = ExtResource("2_1rmny")
 ProgressBar/colors/font_color = Color(0.95, 0.95, 0.95, 1)
 ProgressBar/colors/font_outline_color = Color(0, 0, 0, 1)
 ProgressBar/constants/outline_size = 0
 ProgressBar/styles/background = SubResource("StyleBoxFlat_hfric")
 ProgressBar/styles/fill = SubResource("StyleBoxFlat_3oorc")
+VSeparator/constants/separation = 4
+VSeparator/styles/separator = SubResource("StyleBoxEmpty_ttqs8")
 Window/colors/title_color = Color(0.875, 0.875, 0.875, 1)
 Window/colors/title_outline_modulate = Color(0, 0, 0, 1)
 Window/constants/close_h_offset = 34

@@ -5,7 +5,7 @@ var file_path : String
 @export var convert_format_option : OptionButton
 @onready var ffmpeg: Node = $"ffmpeg funcs"
 @onready var progressbar: ProgressBar = $MarginContainer/VBoxContainer/Bottom/Progress/progressbar
-@onready var progressinfo: Label = $MarginContainer/VBoxContainer/Bottom/Progress/progressinfo
+@onready var progressinfo: RichTextLabel = $MarginContainer/VBoxContainer/Bottom/Progress/progressinfo
 var run : bool = false
 
 
@@ -27,7 +27,7 @@ func _process(_delta: float) -> void:
 	if run:
 		progressbar.value = ffmpeg.progress
 		progressinfo.text = "FPS="+str(ffmpeg.fps)+" Bitrate="+str(ffmpeg.bitrate)+" ETA:"+ffmpeg.formated_eta
-
+		DisplayServer.window_set_title("WRecode "+str(int(ffmpeg.progress))+"% "+"ETA:"+str(ffmpeg.formated_eta))
 func _convert_pressed() -> void:
 	ffmpeg.convert_video($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert/Option.get_item_text($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/Convert/Option.get_selected_id()))
 
@@ -37,15 +37,17 @@ func _compress_pressed() -> void:
 
 
 func _editfps_pressed() -> void:
-	pass # Replace with function body.
+	ffmpeg.change_fps($"MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel2/Edit FPS/Option".text)
 
 
 func _extractaudio_pressed() -> void:
-	ffmpeg.change_audio_bitrate_in_video(1000)
+	ffmpeg.extract_audio()
 
 func _changebitrate_pressed() -> void:
-	ffmpeg.change_bitrate($"MarginContainer/VBoxContainer/AdvancedFuncs/VideoFuncs/Panel4/Change bitrate/Option".text)
-	
+	ffmpeg.change_bitrate($"MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel4/Change bitrate/Option".text)
+
+func _on_changeaudiobitrate_pressed() -> void:
+	ffmpeg.change_audio_bitrate_in_video($"MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Panel5/Change abitrate/Option".text)
 func _select_file_pressed() -> void:
 	$MarginContainer/VBoxContainer/Header/FilePath/FileDialog.show()
 func _on_file_selected(path: String) -> void:
@@ -77,10 +79,12 @@ func _on_options_close_requested() -> void:
 func _on_ffmpeg_funcs_ffmpeg_finished() -> void:
 	run = false
 	show_windows_notification("FFmpeg","Done")
-	progressinfo.text = "WRecode"
+	progressinfo.text = "[tornado radius=1 freq=2]"+"WRecode"
 	create_tween().tween_property($Background.material,"shader_parameter/u_speed",0.2,1)
-
+	DisplayServer.window_set_title("Wrecode")
+	progressbar.hide()
 
 func _on_ffmpeg_funcs_ffmpeg_started() -> void:
 	run = true
-	create_tween().tween_property($Background.material,"shader_parameter/u_speed",2.0,1)
+	create_tween().tween_property($Background.material,"shader_parameter/u_speed",1.5,1)
+	progressbar.show()
