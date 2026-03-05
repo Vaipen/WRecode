@@ -16,7 +16,7 @@ var current_time:float = 0.0
 var eta : float =0.0
 var formated_eta : String = "00:00:00"
 
-#
+
 signal ffmpeg_started
 signal ffmpeg_finished
 func _ready() -> void:
@@ -158,7 +158,7 @@ func change_bitrate(bitratee:String):
 		push_error("FILE NOT EXISTS")
 		return
 		
-	var command = ['-progress','pipe:1',"-i",main.file_path,"-b:v",bitratee+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_"+bitratee+"."+main.file_path.get_extension()]
+	var command = ["-i",main.file_path,"-b:v",bitratee+"k",main.file_path.get_base_dir()+"/"+main.file_path.get_file().get_basename()+"_"+bitratee+"."+main.file_path.get_extension()]
 	var exit_code: Dictionary = OS.execute_with_pipe(ffmpeg_path,command,false)
 	
 	set_stdout(exit_code)
@@ -181,102 +181,144 @@ func convert_video(format:String):
 	
 	set_stdout(exit_code)
 		
-#func compress_video_by_size(self, instance, target_size_mb):
-	#if " " in str(abs_file.name):
-		#print("The file name contains spaces, please remove them.")
-		#return
-	#
-	#try:
-		#target_size_mb = float(self.parameters[target_size_mb].text)
-		#print("Please wait, calculating bitrate...")
-		#if target_size_mb <= 0:
-			#raise ValueError
-	#except:
-		#print("Invalid target size")
-		#return
-	#
-	## ffprobe
-	#cmd = [
-		#ffprobe_path, "-v","error",
-		#"-print_format", "json",
-		#"-show_format",
-		#"-show_streams",
-		#file
-	#]
-#
-	#probe = subprocess.run(
-		#cmd,
-		#stdout=subprocess.PIPE,
-		#stderr=subprocess.PIPE,
-		#text=True
-	#)
-	#if probe.returncode != 0:
-		#raise ValueError(f"ffprobe error: {probe.stderr}")
-#
-	#data = json.loads(probe.stdout)
-#
-	#duration = float(data["format"]["duration"])
-	#if duration <= 0:
-		#raise ValueError("Duration must be more than 0")
-#
-	#audio_bitrate = 128000
-	#width = height = None
-#
-	#for stream in data["streams"]:
-		#if stream.get("codec_type") == "audio" and "bit_rate" in stream:
-			#audio_bitrate = int(stream["bit_rate"])
-			#break
-#
-	#for stream in data["streams"]:
-		#if stream.get("codec_type") == "video":
-			#width = int(stream.get("width", 0))
-			#height = int(stream.get("height", 0))
-			#break
-#
-	#target_bits = target_size_mb *8*1024*1024
-	#total_bitrate = target_bits / duration
-	#audio_steps = [192000, 160000, 128000, 96000, 64000, 48000, 32000]
-	#audio_steps = [a for a in audio_steps if a <= audio_bitrate]
-	#if not audio_steps:
-		#audio_steps = [audio_bitrate]
-#
-	#for a in audio_steps:
-		#vb = total_bitrate - a
-		#if vb >= 20000:
-			#audio_bitrate = a
-			#video_bitrate = vb
-			#break
-	#else:
-		#audio_bitrate = audio_steps[-1]
-		#video_bitrate = max(1, total_bitrate - audio_bitrate)
-#
-#
-	#if video_bitrate <= 0:
-		#raise ValueError("Size too small")
-#
-	#video_kbps = int(video_bitrate/1000)
-	#audio_kbps = int(audio_bitrate/1000)
-#
-	#dir_name = abs_file.parent
-	#base_name = abs_file.stem
-	#ext = abs_file.suffix
-	## output_file = str(dir_name / f"{base_name}_compressed{ext}")
-	#passlog = dir_name / base_name
-#
-	#if os.path.exists("ffmpeg2pass-0.log"):
-		#os.remove("ffmpeg2pass-0.log")
-#
-	#null_out = "NUL" if os.name == "nt" else "/dev/null"
-	#print("The compression has began")
-	#pass1 = (f'{ffmpeg_path} -fflags +genpts+igndts -avoid_negative_ts make_zero -loglevel info  -i "{file}" -fps_mode passthrough -c:v libx264 -b:v {video_kbps}k -pass 1 -passlogfile "{passlog}" -an -f null {null_out}')
-	#pass2 = (f'{ffmpeg_path} -fflags +genpts+igndts -avoid_negative_ts make_zero -loglevel info  -i "{file}" -fps_mode passthrough -c:v libx264 -b:v {video_kbps}k -pass 2 -passlogfile "{passlog}" -c:a aac -b:a {audio_kbps}k {abs_file.stem}_compessed{abs_file.suffix}')
-	#os.system(pass1)
-	#os.system(pass2)
-#
-	#for ext in (".log", ".log.mbtree"):
-		#log_file = Path(str(passlog) + "-0" + ext)
-		#if log_file.exists():
-			#log_file.unlink()
+func compress_video_by_size(input_path: String, target_size_mb: float) -> void:
+	print("Calculating bitrate...")
+	
+	# FFPROBE
+	var probe_args = [
+		"-v", "error",
+		"-print_format", "json",
+		"-show_format",
+		"-show_streams",
+		input_path
+	]
+
+	var output: Array = []
+	var exit_code = OS.execute("ffprobe", probe_args, output, true)
+
+	if exit_code != 0:
+		print("ffprobe error")
+		return
+
+	var json_text: String = ""
+	for line in output:
+		json_text += line
+
+	var data = JSON.parse_string(json_text)
+	if data == null:
+		print("Invalid ffprobe JSON")
+		return
+
+	var duration: float = float(data["format"]["duration"])
+	if duration <= 0.0:
+		print("Invalid duration")
+		return
+
+	# -----------------------
+	# AUDIO BITRATE
+	# -----------------------
+
+	var audio_bitrate: int = 128000
+
+	for stream in data["streams"]:
+		if stream.get("codec_type", "") == "audio":
+			if stream.has("bit_rate"):
+				audio_bitrate = int(stream["bit_rate"])
+			break
+
+	# -----------------------
+	# TARGET CALCULATION
+	# -----------------------
+
+	var target_bits = target_size_mb * 8.0 * 1024.0 * 1024.0
+	var total_bitrate = target_bits / duration
+
+	var audio_steps = [192000,160000,128000,96000,64000,48000,32000]
+	var valid_steps: Array = []
+
+	for a in audio_steps:
+		if a <= audio_bitrate:
+			valid_steps.append(a)
+
+	if valid_steps.is_empty():
+		valid_steps.append(audio_bitrate)
+
+	var video_bitrate: float = 0.0
+
+	for a in valid_steps:
+		var vb = total_bitrate - a
+		if vb >= 20000:
+			audio_bitrate = a
+			video_bitrate = vb
+			break
+
+	if video_bitrate <= 0.0:
+		video_bitrate = max(1.0, total_bitrate - audio_bitrate)
+
+	if video_bitrate <= 0:
+		print("Size too small")
+		return
+
+	var video_kbps: int = int(video_bitrate / 1000.0)
+	var audio_kbps: int = int(audio_bitrate / 1000.0)
+
+	print("Video:", video_kbps, "kbps | Audio:", audio_kbps, "kbps")
+
+	# -----------------------
+	# PATHS
+	# -----------------------
+
+	var dir = input_path.get_base_dir()
+	var base = input_path.get_file().get_basename()
+	var ext = "." + input_path.get_extension()
+
+	var passlog = dir + "/" + base
+	var output_file = dir + "/" + base + "_compressed" + ext
+
+	# удалить старые логи
+	_delete_pass_logs(passlog)
+
+	print("Compression started")
+
+	# -----------------------
+	# PASS 1
+	# -----------------------
+
+	run_ffmpeg_with_progress(input_path,
+	output_file,
+	["-fflags","+genpts+igndts",
+	"-avoid_negative_ts","make_zero",
+	"-c:v","libx264","-b:v",
+	 str(video_kbps) + "k",
+	"-pass","1","-passlogfile",
+	 passlog,"-an","-f","null"])
+
+	await _wait_ffmpeg_finish()
+
+	# -----------------------
+	# PASS 2
+	# -----------------------
+
+	run_ffmpeg_with_progress(
+		input_path,
+		output_file,
+		[
+			"-fflags","+genpts+igndts",
+			"-avoid_negative_ts","make_zero",
+			"-c:v","libx264",
+			"-b:v", str(video_kbps) + "k",
+			"-pass","2",
+			"-passlogfile", passlog,
+			"-c:a","aac",
+			"-b:a", str(audio_kbps) + "k"
+		]
+	)
+
+	await _wait_ffmpeg_finish()
+
+	_delete_pass_logs(passlog)
+
+	print("Done")
 
 func resize_video(x:String,y:String):
 	ffmpeg_started.emit()
@@ -405,3 +447,29 @@ func set_stdout(exit_code):
 		push_error("stdout pipe is null")
 		ffmpeg_pid = -1
 		return
+
+func run_ffmpeg_with_progress(input_path: String, output_path: String, extra_args: Array) -> void:
+	var args: Array = []
+	args.append("-i")
+	args.append(input_path)
+
+	for a in extra_args:
+		args.append(a)
+
+	args.append("-progress")
+	args.append("pipe:1")
+
+	args.append(output_path)
+
+	OS.execute_with_pipe(ffmpeg_path, args, false)
+
+func _wait_ffmpeg_finish() -> void:
+	while OS.is_process_running(ffmpeg_pid):
+		await get_tree().process_frame
+
+func _delete_pass_logs(passlog: String) -> void:
+
+	for ext in [".log", ".log.mbtree"]:
+		var path = passlog + "-0" + ext
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)

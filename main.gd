@@ -80,11 +80,11 @@ func _on_ffmpeg_funcs_ffmpeg_finished() -> void:
 	run = false
 	show_windows_notification("FFmpeg","Done")
 	progressinfo.text = "[tornado radius=1 freq=2]"+"WRecode"
-	create_tween().tween_property($Background.material,"shader_parameter/u_speed",0.2,1)
+	$Background.material.set("shader_parameter/u_speed",0.2)
 	DisplayServer.window_set_title("Wrecode")
 	progressbar.hide()
 
 func _on_ffmpeg_funcs_ffmpeg_started() -> void:
 	run = true
-	create_tween().tween_property($Background.material,"shader_parameter/u_speed",1.5,1)
+	$Background.material.set("shader_parameter/u_speed",1.5)
 	progressbar.show()

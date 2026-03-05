@@ -29,6 +29,7 @@ config/icon="res://icon.svg"
 
 window/size/viewport_width=800
 window/size/viewport_height=600
+window/subwindows/embed_subwindows=false
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/per_pixel_transparency/allowed=true
@@ -38,10 +39,21 @@ window/vsync/vsync_mode=0
 
 run/main_run_args="\"E:\\Для перекода\\THE FINALS - 2026-01-23 23-14-41.mp4\""
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/ai_autonomous_agent/plugin.cfg")
+
 [gui]
 
 timers/tooltip_delay_sec=0.0
 timers/tooltip_delay_sec.editor_hint=0.0
+
+[plugins]
+
+ai_assistant_hub/llm_api="gemini_api"
+ai_assistant_hub/preferences/thinking_target=0
+ai_assistant_hub/preferences/skip_greeting=false
+ai_assistant_hub/preferences/always_scroll_to_bottom=false
 
 [rendering]
 
