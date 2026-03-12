@@ -1933,7 +1933,7 @@ shadow_offset = Vector2(0, 10.34)
 
 [resource]
 default_font = ExtResource("1_yd3fu")
-default_font_size = 20
+default_font_size = 18
 Button/colors/font_color = Color(0.875, 0.875, 0.875, 1)
 Button/colors/font_disabled_color = Color(0.875, 0.875, 0.875, 0.5)
 Button/colors/font_focus_color = Color(0.95, 0.95, 0.95, 1)
@@ -1950,6 +1950,7 @@ Button/colors/icon_pressed_color = Color(0.14117648, 0.14117648, 0.14117648, 1)
 Button/constants/align_to_largest_stylebox = 0
 Button/constants/icon_max_width = 0
 Button/constants/outline_size = 0
+Button/font_sizes/font_size = 25
 Button/styles/disabled = SubResource("StyleBoxFlat_23v3e")
 Button/styles/hover = ExtResource("1_05tig")
 Button/styles/normal = ExtResource("2_1rmny")

@@ -85,7 +85,9 @@ func format_time(seconds: float) -> String:
 		
 	var total: int = int(seconds)
 	
+	@warning_ignore("integer_division")
 	var h: int = total / 3600
+	@warning_ignore("integer_division")
 	var m: int = (total % 3600) / 60
 	var s: int = total % 60
 	
@@ -274,6 +276,7 @@ func compress_video_by_size(input_path: String, target_size_mb: float) -> void:
 
 	var passlog = dir + "/" + base
 	var output_file = dir + "/" + base + "_compressed" + ext
+	
 
 	# удалить старые логи
 	_delete_pass_logs(passlog)
@@ -284,7 +287,7 @@ func compress_video_by_size(input_path: String, target_size_mb: float) -> void:
 	# PASS 1
 	# -----------------------
 
-	run_ffmpeg_with_progress(input_path,
+	run_ffmpeg_with_progress(
 	output_file,
 	["-fflags","+genpts+igndts",
 	"-avoid_negative_ts","make_zero",
@@ -300,7 +303,6 @@ func compress_video_by_size(input_path: String, target_size_mb: float) -> void:
 	# -----------------------
 
 	run_ffmpeg_with_progress(
-		input_path,
 		output_file,
 		[
 			"-fflags","+genpts+igndts",
@@ -448,10 +450,10 @@ func set_stdout(exit_code):
 		ffmpeg_pid = -1
 		return
 
-func run_ffmpeg_with_progress(input_path: String, output_path: String, extra_args: Array) -> void:
+func run_ffmpeg_with_progress(output_path: String, extra_args: Array) -> void:
 	var args: Array = []
 	args.append("-i")
-	args.append(input_path)
+	args.append($"..".file_path)
 
 	for a in extra_args:
 		args.append(a)
@@ -461,8 +463,8 @@ func run_ffmpeg_with_progress(input_path: String, output_path: String, extra_arg
 
 	args.append(output_path)
 
-	OS.execute_with_pipe(ffmpeg_path, args, false)
-
+	var exit_code:Dictionary = OS.execute_with_pipe(ffmpeg_path, args, false)
+	set_stdout(exit_code)
 func _wait_ffmpeg_finish() -> void:
 	while OS.is_process_running(ffmpeg_pid):
 		await get_tree().process_frame

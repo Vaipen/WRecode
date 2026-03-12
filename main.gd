@@ -66,10 +66,8 @@ func show_windows_notification(title: String, message: String):
 		"-Command",
 		"Add-Type -AssemblyName System.Windows.Forms; $notify = New-Object System.Windows.Forms.NotifyIcon; $notify.Icon = [System.Drawing.SystemIcons]::Information; $notify.BalloonTipTitle = '%s'; $notify.BalloonTipText = '%s'; $notify.Visible = $true; $notify.ShowBalloonTip(5000);" % [title, message]
 	]
-	
 	var output = []
 	var exit_code = OS.execute(command, args, output, true)
-	
 	if exit_code != 0:
 		push_error("Failed to show notification")
 func _on_options_close_requested() -> void:
