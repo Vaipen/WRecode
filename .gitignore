@@ -7,3 +7,4 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+\addons\ai_autonomous_agent

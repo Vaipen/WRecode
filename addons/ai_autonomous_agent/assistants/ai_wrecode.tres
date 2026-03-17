@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AIAssistantResource" format=3 uid="uid://bhxan8wfhnday"]
+
+[ext_resource type="Resource" uid="uid://b0fti7g31ugs1" path="res://addons/ai_autonomous_agent/llm_providers/gemini.tres" id="1_fhg82"]
+[ext_resource type="Script" uid="uid://bi0d7x7jkgql8" path="res://addons/ai_autonomous_agent/assistants/ai_assistant_resource.gd" id="2_gxeoh"]
+
+[resource]
+script = ExtResource("2_gxeoh")
+type_name = "WRecode"
+ai_model = "models/gemini-3-flash-preview"
+llm_provider = ExtResource("1_fhg82")
+ai_description = "You are an autonomous GDScript programming agent for Godot 4.6. Execute all possible steps to complete the orders given to you. You help me with making my project. Compress, convert, edit video with ffmpeg - WRecode"
