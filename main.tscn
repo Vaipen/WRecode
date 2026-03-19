@@ -300,13 +300,13 @@ icon = ExtResource("9_vivmo")
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 30
-placeholder_text = "FPS"
+placeholder_text = "e.g 1920x1080"
 emoji_menu_enabled = false
 virtual_keyboard_type = 2
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Resize/HBoxContainer" unique_id=1660311819]
 layout_mode = 2
-tooltip_text = "Enter the output video FPS (frames per second)"
+tooltip_text = "Enter the size e.g 1920x1080"
 disabled = true
 text = "?"
 
@@ -424,7 +424,7 @@ theme_override_font_sizes/font_size = 30
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Convert/HBoxContainer" unique_id=1998288439]
 layout_mode = 2
-tooltip_text = "Choose a video file extension"
+tooltip_text = "Choose a image file extension"
 disabled = true
 text = "?"
 
@@ -480,13 +480,13 @@ icon = ExtResource("9_vivmo")
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 30
-placeholder_text = "x:y"
+placeholder_text = "e.g 1920x1080"
 emoji_menu_enabled = false
 virtual_keyboard_type = 2
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Resize/HBoxContainer" unique_id=1151691096]
 layout_mode = 2
-tooltip_text = "Enter the output video FPS (frames per second)"
+tooltip_text = "Enter the size e.g 1920x1080"
 disabled = true
 text = "?"
 
@@ -512,11 +512,12 @@ icon = ExtResource("13_2cqfq")
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 30
-placeholder_text = "Level"
+placeholder_text = "level"
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/JPEG Demake/HBoxContainer" unique_id=729579913]
 layout_mode = 2
-tooltip_text = "Enter the output video bitrate in kb/s (kilobytes per second)"
+tooltip_text = "75-Best balance
+<50 - Destroy the quality"
 disabled = true
 text = "?"
 
@@ -549,7 +550,7 @@ theme_override_font_sizes/font_size = 30
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/Convert/HBoxContainer" unique_id=908047813]
 layout_mode = 2
-tooltip_text = "Choose a video file extension"
+tooltip_text = "Choose a audio file extension"
 disabled = true
 text = "?"
 
@@ -578,7 +579,7 @@ placeholder_text = "Hz"
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/EditSampleRate/HBoxContainer" unique_id=2104154483]
 layout_mode = 2
-tooltip_text = "Enter the output size in megabytes"
+tooltip_text = "Enter the sample rate in Hz"
 disabled = true
 text = "?"
 
@@ -608,7 +609,7 @@ placeholder_text = "kb/s"
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/ChangeBitrate/HBoxContainer" unique_id=666591876]
 layout_mode = 2
-tooltip_text = "Enter the output video bitrate in kb/s (kilobytes per second)"
+tooltip_text = "Enter the output audio bitrate in kb/s (kilobytes per second)"
 disabled = true
 text = "?"
 
@@ -729,19 +730,18 @@ devmode = true
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Header/FilePath" to="." method="_select_file_pressed"]
 [connection signal="file_selected" from="MarginContainer/VBoxContainer/Header/FilePath/FileDialog" to="." method="_on_file_selected"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/HBoxContainer/Function" to="." method="_convert_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Compress/HBoxContainer/Function" to="." method="_compress_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/EditFPS/HBoxContainer/Function" to="." method="_editfps_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Convert/HBoxContainer/Function" to="." method="_on_convert_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Compress/HBoxContainer/Function" to="." method="_on_compress_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/EditFPS/HBoxContainer/Function" to="." method="_on_editfps_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Resize/HBoxContainer/Function" to="." method="_on_resize_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Extract/HBoxContainer/Function" to="." method="_extractaudio_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChangeBitrate/HBoxContainer/Function" to="." method="_changebitrate_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Extract/HBoxContainer/Function" to="." method="_on_audioextract_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChangeBitrate/HBoxContainer/Function" to="." method="_on_changebitrate_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChnageABitrate/HBoxContainer/Function" to="." method="_on_changeaudiobitrate_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Convert/HBoxContainer/Function" to="." method="_convert_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Compress/HBoxContainer/Function" to="." method="_compress_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Convert/HBoxContainer/Function" to="." method="_on_convert_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Compress/HBoxContainer/Function" to="." method="_on_compress_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Resize/HBoxContainer/Function" to="." method="_on_resize_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/JPEG Demake/HBoxContainer/Function" to="." method="_changebitrate_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/Convert/HBoxContainer/Function" to="." method="_convert_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/EditSampleRate/HBoxContainer/Function" to="." method="_on_editsamplerate_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/Convert/HBoxContainer/Function" to="." method="_on_convert_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/EditSampleRate/HBoxContainer/Function" to="." method="_on_samplerate_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/ChangeBitrate/HBoxContainer/Function" to="." method="_on_changebitrate_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Bottom/Settings" to="." method="_on_settings_pressed"]
 [connection signal="close_requested" from="MarginContainer/VBoxContainer/Bottom/Settings/Window" to="." method="_on_options_close_requested"]

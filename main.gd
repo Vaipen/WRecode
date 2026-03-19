@@ -76,54 +76,6 @@ func _populate_formats(vid, aud, img):
 		for f in formats: current_option.add_item(f)
 		convert_format_option = current_option # Запоминаем для функции конвертации
 
-# --- ОБРАБОТКА НАЖАТИЙ (Общие функции для всех панелей) ---
-
-func _convert_pressed() -> void:
-	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
-	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.convert_video(fmt)
-	elif $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible: 
-		ffmpeg.convert_audio(fmt)
-	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
-		ffmpeg.convert_image(fmt)
-
-func _compress_pressed() -> void:
-	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible:
-		var mb = float($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Compress/HBoxContainer/Option.text)
-		ffmpeg.compress_video_by_size(file_path, mb)
-	elif $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible:
-		# Для аудио используем это как изменение частоты дискретизации (Sample Rate)
-		var hz = $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/EditSampleRate/HBoxContainer/Option.text
-		ffmpeg.change_audio_samplerate(hz)
-	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
-		# Для фото простое сжатие через ресайз (в данном примере оставим логику как в ffmpeg_funcs)
-		ffmpeg.resize_image("1920", "1080") 
-
-func _changebitrate_pressed() -> void:
-	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible:
-		var br = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChangeBitrate/HBoxContainer/Option.text
-		ffmpeg.change_bitrate(br)
-	elif $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible:
-		var abr = $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/ChangeBitrate/HBoxContainer/Option.text
-		ffmpeg.change_audio_bitrate(abr)
-	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
-		# JPEG Demake использует уровень сжатия (Level)
-		var level = $"MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/JPEG Demake/HBoxContainer/Option".text
-		ffmpeg.compress_image(level, "default")
-
-# --- СПЕЦИФИЧНЫЕ ФУНКЦИИ ---
-
-func _editfps_pressed(): 
-	var fps_val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/EditFPS/HBoxContainer/Option.text
-	ffmpeg.change_fps(fps_val)
-
-func _extractaudio_pressed(): 
-	ffmpeg.extract_audio()
-
-func _on_changeaudiobitrate_pressed(): 
-	var abr = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChnageABitrate/HBoxContainer/Option.text
-	ffmpeg.change_audio_bitrate_in_video(abr)
-
 # --- СИСТЕМНЫЕ СИГНАЛЫ ---
 
 func _on_ffmpeg_funcs_ffmpeg_started():
@@ -146,3 +98,63 @@ func _on_options_close_requested(): $MarginContainer/VBoxContainer/Bottom/Settin
 func _show_notification(title, msg):
 	var args = ["-Command", "Add-Type -AssemblyName System.Windows.Forms; $i=[System.Drawing.SystemIcons]::Information; $n=New-Object System.Windows.Forms.NotifyIcon; $n.Icon=$i; $n.BalloonTipTitle='%s'; $n.BalloonTipText='%s'; $n.Visible=$true; $n.ShowBalloonTip(5000);" % [title, msg]]
 	OS.execute("powershell", args)
+
+
+func _on_convert_pressed() -> void:
+	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
+	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
+		ffmpeg.convert_video(fmt)
+	elif $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible: 
+		ffmpeg.convert_audio(fmt)
+	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
+		ffmpeg.convert_image(fmt)
+
+
+func _on_compress_pressed() -> void:
+	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
+	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
+		ffmpeg.compress_video_by_size(fmt)
+	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
+		ffmpeg.compress_image(fmt)
+
+
+func _on_editfps_pressed() -> void:
+	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
+	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
+		ffmpeg.change_fps(fmt)
+
+
+
+func _on_resize_pressed() -> void:
+	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
+	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
+		ffmpeg.resize_video(fmt)
+	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
+		ffmpeg.resize_image(fmt)
+
+
+
+func _on_audioextract_pressed() -> void:
+	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
+		ffmpeg.resize_video()
+
+
+func _on_changebitrate_pressed() -> void:
+	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
+	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
+		ffmpeg.change_bitrate(fmt)
+	elif $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible:
+		ffmpeg.change_audio_bitrate(fmt)
+
+
+func _on_changeaudiobitrate_pressed() -> void:
+	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
+	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
+		ffmpeg.change_audio_bitrate_in_video(fmt)
+
+
+func _on_samplerate_pressed() -> void:
+	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
+	if $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible:
+		ffmpeg.change_audio_samplerate(fmt)
+	
