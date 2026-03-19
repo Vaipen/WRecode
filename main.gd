@@ -88,7 +88,8 @@ func _on_ffmpeg_funcs_ffmpeg_finished():
 	progressbar.hide()
 	$Background.material.set("shader_parameter/u_speed", 0.2)
 	DisplayServer.window_set_title("WRecode")
-	_show_notification("WRecode", "Task Finished!")
+	if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
+		_show_notification("WRecode", "Task Finished!")
 
 func _select_file_pressed(): $MarginContainer/VBoxContainer/Header/FilePath/FileDialog.show()
 func _on_file_selected(path: String): _update_inputfile(path)
