@@ -35,10 +35,6 @@ window/stretch/aspect="expand"
 window/per_pixel_transparency/allowed=true
 window/vsync/vsync_mode=0
 
-[editor]
-
-run/main_run_args="\"E:\\Для перекода\\THE FINALS - 2026-01-23 23-14-41.mp4\""
-
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/ai_autonomous_agent/plugin.cfg")

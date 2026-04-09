@@ -33,7 +33,13 @@ func _process(_delta: float) -> void:
 # --- ЛОГИКА ВЫБОРА ФАЙЛА ---
 
 func _update_inputfile(path: String) -> void:
-	if path == "": return
+	if path == "":
+		$"MarginContainer/VBoxContainer/Select file".show()
+		$MarginContainer/VBoxContainer/SimpleFuncs.hide()
+		return
+	else:
+		$"MarginContainer/VBoxContainer/Select file".hide()
+		$MarginContainer/VBoxContainer/SimpleFuncs.show()
 	file_path = path
 	input_file_path.text = path
 	var ext = path.get_extension().to_lower()
@@ -114,7 +120,7 @@ func _on_convert_pressed() -> void:
 func _on_compress_pressed() -> void:
 	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.compress_video_by_size(fmt)
+		ffmpeg.compress_video_by_size(float(fmt))
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
 		ffmpeg.compress_image(fmt)
 

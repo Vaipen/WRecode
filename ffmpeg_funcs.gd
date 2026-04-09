@@ -90,7 +90,8 @@ func change_bitrate(kbps: String): _run_ffmpeg(main.file_path.get_basename() + "
 func change_audio_bitrate_in_video(kbps: String): _run_ffmpeg(main.file_path.get_basename() + "_a" + kbps + "k." + main.file_path.get_extension(), ["-c:v", "copy", "-b:a", kbps + "k"])
 func resize_video(x: String, y: String): _run_ffmpeg(main.file_path.get_basename() + "_" + x + "x" + y + "." + main.file_path.get_extension(), ["-vf", "scale=" + x + ":" + y])
 
-func compress_video_by_size(input_path: String, target_size_mb: float):
+func compress_video_by_size(target_size_mb: float):
+	var input_path = main.file_path
 	target_size_mb-=0.15
 	var duration = get_duration_seconds(input_path)
 	if duration <= 0: return
