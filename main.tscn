@@ -713,8 +713,6 @@ size_flags_horizontal = 3
 
 [node name="progressbar" type="ProgressBar" parent="MarginContainer/VBoxContainer/Bottom/Progress" unique_id=97581318]
 layout_mode = 2
-step = 1.0
-rounded = true
 
 [node name="progressinfo" type="RichTextLabel" parent="MarginContainer/VBoxContainer/Bottom/Progress" unique_id=1212095109]
 layout_mode = 2

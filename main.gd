@@ -24,9 +24,9 @@ func _ready() -> void:
 	var args = OS.get_cmdline_args()
 	if args.size() > 1: _update_inputfile(args[1].strip_edges())
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if run:
-		progressbar.value = ffmpeg.progress
+		progressbar.value = lerp(progressbar.value, ffmpeg.progress, delta*10)
 		progressinfo.text = "FPS: %d | Bitrate: %s | ETA: %s" % [ffmpeg.fps, ffmpeg.bitrate, ffmpeg.formated_eta]
 		DisplayServer.window_set_title("WRecode - %d%%" % int(ffmpeg.progress))
 
