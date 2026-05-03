@@ -1,4 +1,4 @@
-/ffmpeg
+ffmpeg/
 *.zip
 *.exe
 *.pck
@@ -7,4 +7,6 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
-\addons\ai_autonomous_agent
+.ziva/
+addons/ziva_agent/
+ziva_installer/

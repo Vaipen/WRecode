@@ -97,6 +97,10 @@ func _on_ffmpeg_funcs_ffmpeg_finished():
 	if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
 		_show_notification("WRecode", "Task Finished!")
 
+
+
+
+
 func _select_file_pressed(): $MarginContainer/VBoxContainer/Header/FilePath/FileDialog.show()
 func _on_file_selected(path: String): _update_inputfile(path)
 func _on_settings_pressed(): $MarginContainer/VBoxContainer/Bottom/Settings/Window.show()
@@ -118,50 +122,44 @@ func _on_convert_pressed() -> void:
 
 
 func _on_compress_pressed() -> void:
-	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.compress_video_by_size(float(fmt))
+		ffmpeg.compress_video_by_size(float($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Compress/HBoxContainer/Option.text))
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
-		ffmpeg.compress_image(fmt)
+		ffmpeg.compress_image(float($MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Compress/HBoxContainer/Option.text))
 
 
 func _on_editfps_pressed() -> void:
-	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.change_fps(fmt)
+		ffmpeg.change_fps($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/EditFPS/HBoxContainer/Option.text)
 
 
 
 func _on_resize_pressed() -> void:
-	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.resize_video(fmt)
+		ffmpeg.resize_video($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Resize/HBoxContainer/Option.text)
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
-		ffmpeg.resize_image(fmt)
+		ffmpeg.resize_image($MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Resize/HBoxContainer/Option.text)
 
 
 
 func _on_audioextract_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.resize_video()
+		ffmpeg.extract_audio()
 
 
 func _on_changebitrate_pressed() -> void:
-	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
-	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.change_bitrate(fmt)
+	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible:
+		ffmpeg.change_bitrate($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChangeBitrate/HBoxContainer/Option.text)
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible:
-		ffmpeg.change_audio_bitrate(fmt)
+		ffmpeg.change_audio_bitrate($MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/ChangeBitrate/HBoxContainer/Option.text)
 
 
 func _on_changeaudiobitrate_pressed() -> void:
-	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.change_audio_bitrate_in_video(fmt)
+		ffmpeg.change_audio_bitrate_in_video($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChnageABitrate/HBoxContainer/Option.text)
 
 
 func _on_samplerate_pressed() -> void:
-	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
 	if $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible:
-		ffmpeg.change_audio_samplerate(fmt)
+		ffmpeg.change_audio_samplerate($MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/EditSampleRate/HBoxContainer/Option.text)
 	
