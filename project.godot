@@ -37,7 +37,7 @@ window/vsync/vsync_mode=0
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/ai_autonomous_agent/plugin.cfg")
+enabled=PackedStringArray()
 
 [gui]
 

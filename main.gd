@@ -5,7 +5,7 @@ var file_path : String
 @export var input_file_path : Button
 @export var convert_format_option : OptionButton
 @onready var ffmpeg: Node = $"ffmpeg funcs"
-@onready var progressbar: ProgressBar = $MarginContainer/VBoxContainer/Bottom/Progress/progressbar
+@onready var m3progressbar: Control = $MarginContainer/VBoxContainer/Bottom/Progress/MarginContainer/WavyProgressBar
 @onready var progressinfo: RichTextLabel = $MarginContainer/VBoxContainer/Bottom/Progress/progressinfo
 
 # Состояние работы
@@ -14,19 +14,24 @@ var run : bool = false
 # Типы файлов для фильтрации интерфейса
 var file_types = {
 	'image': ["jpg", "jpeg", "png", "bmp", "gif", "webp"],
-	'video': ["mp4", "avi", "mov", "mkv", "webm", "flv", "wmv"],
-	'audio': ["mp3", "wav", "flac", "aac", "ogg", "m4a"]
+	'video': ["mp4", "avi", "mov", "mkv", "flv", "wmv"],
+	'audio': ["mp3", "wav", "flac", "aac", "ogg"]
 }
 
 func _ready() -> void:
-	progressbar.hide()
-	# Если файл был передан через аргументы запуска
-	var args = OS.get_cmdline_args()
-	if args.size() > 1: _update_inputfile(args[1].strip_edges())
+	m3progressbar.modulate = Color.TRANSPARENT
+	
+	# Получаем именно пользовательские аргументы
+	var args = OS.get_cmdline_user_args()
+	if args.size() > 0:
+		# Windows иногда передает пути со слешами \, меняем их на godot-style /
+		var file_path_arg = args[0].replace("\\", "/").strip_edges()
+		_update_inputfile(file_path_arg)
 
 func _process(delta: float) -> void:
 	if run:
-		progressbar.value = lerp(progressbar.value, ffmpeg.progress, delta*10)
+		m3progressbar.progress = lerp(m3progressbar.progress, ffmpeg.progress/100, delta*5)
+		m3progressbar.wave_speed = lerp(m3progressbar.wave_speed, ffmpeg.fps/100, delta*4)
 		progressinfo.text = "FPS: %d | Bitrate: %s | ETA: %s" % [ffmpeg.fps, ffmpeg.bitrate, ffmpeg.formated_eta]
 		DisplayServer.window_set_title("WRecode - %d%%" % int(ffmpeg.progress))
 
@@ -86,16 +91,17 @@ func _populate_formats(vid, aud, img):
 
 func _on_ffmpeg_funcs_ffmpeg_started():
 	run = true
-	progressbar.show()
+	create_tween().tween_property(m3progressbar, "modulate", Color(1,1,1,1), 1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SPRING)
 	$Background.material.set("shader_parameter/u_speed", 1.5)
 
 func _on_ffmpeg_funcs_ffmpeg_finished():
 	run = false
-	progressbar.hide()
+	create_tween().tween_property(m3progressbar, "modulate", Color(1,1,1,0), 1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SPRING)
 	$Background.material.set("shader_parameter/u_speed", 0.2)
+	progressinfo.text = "[tornado radius=1 freq=-2]WRecode"
 	DisplayServer.window_set_title("WRecode")
 	if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
-		_show_notification("WRecode", "Task Finished!")
+		$Sounds/Finish.play()
 
 
 
@@ -123,22 +129,32 @@ func _on_convert_pressed() -> void:
 
 func _on_compress_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.compress_video_by_size(float($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Compress/HBoxContainer/Option.text))
+		var val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Compress/HBoxContainer/Option.text.strip_edges()
+		if val == "" or float(val) <= 0: return
+		ffmpeg.compress_video_by_size(float(val))
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
-		ffmpeg.compress_image(float($MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Compress/HBoxContainer/Option.text))
+		var val = $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Compress/HBoxContainer/Option.text.strip_edges()
+		if val == "" or float(val) <= 0: return
+		ffmpeg.compress_image(float(val))
 
 
 func _on_editfps_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.change_fps($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/EditFPS/HBoxContainer/Option.text)
+		var val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/EditFPS/HBoxContainer/Option.text.strip_edges()
+		if val == "": return
+		ffmpeg.change_fps(val)
 
 
 
 func _on_resize_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.resize_video($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Resize/HBoxContainer/Option.text)
+		var val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Resize/HBoxContainer/Option.text.strip_edges()
+		if val == "": return
+		ffmpeg.resize_video(val)
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
-		ffmpeg.resize_image($MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Resize/HBoxContainer/Option.text)
+		var val = $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Resize/HBoxContainer/Option.text.strip_edges()
+		if val == "": return
+		ffmpeg.resize_image(val)
 
 
 
@@ -149,17 +165,25 @@ func _on_audioextract_pressed() -> void:
 
 func _on_changebitrate_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible:
-		ffmpeg.change_bitrate($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChangeBitrate/HBoxContainer/Option.text)
+		var val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChangeBitrate/HBoxContainer/Option.text.strip_edges()
+		if val == "": return
+		ffmpeg.change_bitrate(val)
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible:
-		ffmpeg.change_audio_bitrate($MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/ChangeBitrate/HBoxContainer/Option.text)
+		var val = $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/ChangeBitrate/HBoxContainer/Option.text.strip_edges()
+		if val == "": return
+		ffmpeg.change_audio_bitrate(val)
 
 
 func _on_changeaudiobitrate_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.change_audio_bitrate_in_video($MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChnageABitrate/HBoxContainer/Option.text)
+		var val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChnageABitrate/HBoxContainer/Option.text.strip_edges()
+		if val == "": return
+		ffmpeg.change_audio_bitrate_in_video(val)
 
 
 func _on_samplerate_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible:
-		ffmpeg.change_audio_samplerate($MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/EditSampleRate/HBoxContainer/Option.text)
+		var val = $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/EditSampleRate/HBoxContainer/Option.text.strip_edges()
+		if val == "": return
+		ffmpeg.change_audio_samplerate(val)
 	

@@ -108,15 +108,28 @@ func compress_video_by_size(target_size_mb: float):
 func convert_audio(format: String):
 	var codec = "libmp3lame" if format == "mp3" else "aac"
 	if format == "wav": codec = "pcm_s16le"
+	elif format == "flac": codec = "flac"
+	elif format == "ogg": codec = "libvorbis"
 	_run_ffmpeg(main.file_path.get_basename() + "." + format, ["-c:a", codec])
-func change_audio_bitrate(kbps: String): _run_ffmpeg(main.file_path.get_basename() + "_" + kbps + "k.mp3", ["-b:a", kbps + "k"])
-func change_audio_samplerate(hz: String): _run_ffmpeg(main.file_path.get_basename() + "_" + hz + "hz.wav", ["-ar", hz])
+func change_audio_bitrate(kbps: String): _run_ffmpeg(main.file_path.get_basename() + "_%sk."%[kbps]+main.file_path.get_extension(), ["-b:a", kbps + "k"])
+func change_audio_samplerate(hz: String): _run_ffmpeg(main.file_path.get_basename() + "_%shz."%[str(hz.to_int())]+main.file_path.get_extension(), ["-ar", str(hz.to_int())])
 
 # --- Image ---
 func convert_image(format: String): _run_ffmpeg(main.file_path.get_basename() + "." + format, [])
-func resize_image(x: String, y: String): _run_ffmpeg(main.file_path.get_basename() + "_" + x + "x" + y + "." + main.file_path.get_extension(), ["-vf", "scale=" + x + ":" + y])
-func compress_image(q: String, level: String): _run_ffmpeg(main.file_path.get_basename() + "_low.jpg", ["-q:v", q, "-compression_level", level, "-vf", "format=yuvj420p"])
-
+func resize_image(size: String): _run_ffmpeg(main.file_path.get_basename() + "_%s."%[str(size.replace(":", "x"))] + main.file_path.get_extension(), ["-vf", "scale=" + size])
+func compress_image(target_size_mb: float):
+	if target_size_mb <= 0: return
+	var file = FileAccess.open(main.file_path, FileAccess.READ)
+	var current_size_mb = float(file.get_length()) / (1024.0 * 1024.0)
+	
+	# Считаем примерный уровень сжатия (q:v). 
+	# Чем больше разница в размере, тем больше цифра q:v
+	var ratio = current_size_mb / target_size_mb
+	var estimated_q = clamp(int(ratio * 5.0), 2, 31) 
+	
+	var out_path = main.file_path.get_basename() + "_low.jpg"
+	_run_ffmpeg(out_path, ["-q:v", str(estimated_q)])
+	
 # --- Utils ---
 func get_duration_seconds(path: String) -> float:
 	var output = []
@@ -124,4 +137,4 @@ func get_duration_seconds(path: String) -> float:
 	return output[0].strip_edges().to_float() if code == 0 and not output.is_empty() else 0.0
 
 func format_time(seconds: float) -> String:
-	return "%02d:%02d:%02d" % [int(seconds)/3600, (int(seconds)%3600)/60, int(seconds)%60]
+	return "%02d:%02d:%02d" % [int(seconds / 3600.0), int(fmod(seconds, 3600.0) / 60.0), int(fmod(seconds, 60.0))]
