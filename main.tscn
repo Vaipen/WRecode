@@ -14,8 +14,11 @@
 [ext_resource type="Texture2D" uid="uid://de1fyc4roknvy" path="res://ui/icons/10k_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="9_yaehf"]
 [ext_resource type="Texture2D" uid="uid://cdw66c3jj7a4n" path="res://ui/icons/movie_speaker_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="10_074og"]
 [ext_resource type="Texture2D" uid="uid://bslul8khaenh8" path="res://ui/icons/settings_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="11_cegan"]
+[ext_resource type="Shader" uid="uid://ckx0q3lgyu0ks" path="res://shaders/blur.gdshader" id="14_yaehf"]
 [ext_resource type="AudioStream" uid="uid://bc5ofckairiq2" path="res://sounds/Accept.ogg" id="15_vivmo"]
 [ext_resource type="AudioStream" uid="uid://1hnpv64nfktj" path="res://sounds/Tap.ogg" id="16_2cqfq"]
+[ext_resource type="Script" uid="uid://cxp7qekuypcos" path="res://send_to_manager.gd" id="18_074og"]
+[ext_resource type="Texture2D" uid="uid://d117j1e8k1ns7" path="res://pics/Sendto.png" id="19_cegan"]
 
 [sub_resource type="Shader" id="Shader_ycdy4"]
 code = "shader_type canvas_item;
@@ -96,6 +99,88 @@ shader_parameter/u_color_high = Color(0.9647059, 0.96862745, 0.92156863, 1)
 [sub_resource type="LabelSettings" id="LabelSettings_vivmo"]
 font_size = 36
 shadow_offset = Vector2(1, 4)
+
+[sub_resource type="Shader" id="Shader_cegan"]
+code = "shader_type canvas_item;
+
+
+
+uniform float burst_progress : hint_range(0.0, 1.0) = 0.0; // animate 0 → 1
+
+uniform float spread_strength : hint_range(0.0, 2.0) = 1.0; // how far pixels fly out
+
+uniform float distortion_strength : hint_range(0.0, 0.2) = 0.05; // wavy distortion
+
+uniform float fade_start : hint_range(0.0, 1.0) = 0.7; // when to start fading alpha
+
+
+
+void fragment() {
+
+    // Center UVs
+
+    vec2 centered_uv = UV - vec2(0.5);
+
+
+
+    // Direction from center
+
+    vec2 dir = normalize(centered_uv);
+
+
+
+    // Distance from center
+
+    float dist = length(centered_uv);
+
+
+
+    // Push pixels outward over time
+
+    vec2 uv_outward = centered_uv + dir * burst_progress * spread_strength;
+
+
+
+    // Add distortion for energy-like wobble
+
+    uv_outward += distortion_strength * vec2(
+
+        sin(dist * 20.0 - TIME * 10.0),
+
+        cos(dist * 20.0 - TIME * 8.0)
+
+    ) * burst_progress;
+
+
+
+    // Return to standard UV space
+
+    vec2 final_uv = uv_outward + vec2(0.5);
+
+
+
+    // Sample texture
+
+    vec4 tex = texture(TEXTURE, final_uv);
+
+
+
+    // Fade out towards the end
+
+    float alpha_factor = 1.0 - smoothstep(fade_start, 1.0, burst_progress);
+
+    tex.a *= alpha_factor;
+
+    COLOR = tex;
+
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_82xsv"]
+shader = SubResource("Shader_cegan")
+shader_parameter/burst_progress = 0.0070000003325
+shader_parameter/spread_strength = 0.0
+shader_parameter/distortion_strength = 0.20000000298023
+shader_parameter/fade_start = 0.6190000294025
 
 [sub_resource type="GDScript" id="GDScript_w48qg"]
 resource_name = "m3progressbar"
@@ -195,6 +280,26 @@ func _update_lines() -> void:
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vivmo"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_074og"]
+shader = ExtResource("14_yaehf")
+shader_parameter/strength = 3.3
+shader_parameter/mix_percentage = 0.3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yaehf"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.1, 0.1, 0.1, 0.8235294)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+corner_detail = 5
+shadow_color = Color(0, 0, 0, 0.10980392)
+shadow_size = 15
+shadow_offset = Vector2(0, 6.505)
+
 [node name="Main" type="Control" unique_id=608843615 node_paths=PackedStringArray("input_file_path", "convert_format_option")]
 layout_mode = 3
 anchors_preset = 15
@@ -253,7 +358,7 @@ texture = ExtResource("4_dg77c")
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 24
-text = "C:/___/______.___"
+text = "Click to choose file"
 alignment = 0
 clip_text = true
 
@@ -281,11 +386,27 @@ label_settings = SubResource("LabelSettings_vivmo")
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="not supported" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1537081016]
+visible = false
+material = SubResource("ShaderMaterial_82xsv")
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 44
+text = "This file not supported"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="fillemptyspase" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=375835338]
+layout_mode = 2
+size_flags_vertical = 3
+
 [node name="SimpleFuncs" type="PanelContainer" parent="MarginContainer/VBoxContainer" unique_id=1088961410]
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="VideoFuncs" type="VBoxContainer" parent="MarginContainer/VBoxContainer/SimpleFuncs" unique_id=1066129389]
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -779,6 +900,15 @@ popup/item_0/id = 0
 popup/item_1/text = "Русский"
 popup/item_1/id = 1
 
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=654263693]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=1641719712]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.64332217, 0.47464776, 0.5319018, 1)
+text = "Delete from Send to"
+
 [node name="Progress" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Bottom" unique_id=1811480562]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -822,6 +952,141 @@ scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 2
 
+[node name="First Install" type="Control" parent="." unique_id=1535529043]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Blur" type="ColorRect" parent="First Install" unique_id=1821106913]
+material = SubResource("ShaderMaterial_074og")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SendToNoficator" type="MarginContainer" parent="First Install" unique_id=362087656]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -188.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = ExtResource("1_5vw27")
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Panel" type="Panel" parent="First Install/SendToNoficator" unique_id=1835547346]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_yaehf")
+
+[node name="MarginContainer" type="MarginContainer" parent="First Install/SendToNoficator/Panel" unique_id=1575916623]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="First Install/SendToNoficator/Panel/MarginContainer" unique_id=1595081049]
+layout_mode = 2
+
+[node name="Label" type="RichTextLabel" parent="First Install/SendToNoficator/Panel/MarginContainer/HBoxContainer" unique_id=842546239]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/normal_font_size = 24
+bbcode_enabled = true
+text = "[wave amp=4.0 freq=5.0 connected=1]Add WRecode to[font_size={32}]
+Send to menu"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Button" type="Button" parent="First Install/SendToNoficator/Panel/MarginContainer/HBoxContainer" unique_id=1962851839]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 50
+text = "Install"
+
+[node name="HowTo" type="MarginContainer" parent="First Install" unique_id=219617754]
+visible = false
+layout_mode = 0
+offset_top = -10.0
+offset_right = 800.0
+offset_bottom = 590.0
+theme = ExtResource("1_5vw27")
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Panel" type="Panel" parent="First Install/HowTo" unique_id=374253881]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_yaehf")
+
+[node name="MarginContainer" type="MarginContainer" parent="First Install/HowTo/Panel" unique_id=630824957]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="First Install/HowTo/Panel/MarginContainer" unique_id=2069612365]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="RichTextLabel" parent="First Install/HowTo/Panel/MarginContainer/VBoxContainer" unique_id=1088787741]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "[pulse freq=1.0 color=#ffffffbc ease=-2.0][font_size={32}]How to use[/font_size]
+
+You can now open WRecode via the \"Send to\" menu.
+
+Simply select the desired media file, right-click, and choose \"Send to.\""
+scroll_active = false
+horizontal_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="First Install/HowTo/Panel/MarginContainer/VBoxContainer" unique_id=224796289]
+layout_mode = 2
+theme_override_constants/margin_left = 160
+theme_override_constants/margin_right = 160
+
+[node name="TextureRect" type="TextureRect" parent="First Install/HowTo/Panel/MarginContainer/VBoxContainer/MarginContainer" unique_id=1267278792]
+layout_mode = 2
+size_flags_vertical = 8
+texture = ExtResource("19_cegan")
+expand_mode = 5
+
+[node name="Label2" type="Label" parent="First Install/HowTo/Panel/MarginContainer/VBoxContainer" unique_id=1315825138]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "You can remove it from settings"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="First Install/HowTo/Panel/MarginContainer/VBoxContainer" unique_id=1190331019]
+layout_mode = 2
+text = "OK"
+
 [node name="ffmpeg funcs" type="Node" parent="." unique_id=1611590948]
 script = ExtResource("9_4c57u")
 devmode = true
@@ -834,6 +1099,9 @@ volume_db = -5.0
 
 [node name="Tap" type="AudioStreamPlayer" parent="Sounds" unique_id=1716701613]
 stream = ExtResource("16_2cqfq")
+
+[node name="SendToManager" type="Node" parent="." unique_id=984444195]
+script = ExtResource("18_074og")
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Header/FilePath" to="." method="_select_file_pressed"]
 [connection signal="file_selected" from="MarginContainer/VBoxContainer/Header/FilePath/FileDialog" to="." method="_on_file_selected"]
@@ -852,5 +1120,8 @@ stream = ExtResource("16_2cqfq")
 [connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/ChangeBitrate/HBoxContainer/Function" to="." method="_on_changebitrate_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Bottom/Settings" to="." method="_on_settings_pressed"]
 [connection signal="close_requested" from="MarginContainer/VBoxContainer/Bottom/Settings/Window" to="." method="_on_options_close_requested"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/Button" to="SendToManager" method="_on_buttondelete_pressed"]
+[connection signal="pressed" from="First Install/SendToNoficator/Panel/MarginContainer/HBoxContainer/Button" to="SendToManager" method="_on_buttoninstall_pressed"]
+[connection signal="pressed" from="First Install/HowTo/Panel/MarginContainer/VBoxContainer/Button" to="SendToManager" method="_on_buttonfinal_pressed"]
 [connection signal="ffmpeg_finished" from="ffmpeg funcs" to="." method="_on_ffmpeg_funcs_ffmpeg_finished"]
 [connection signal="ffmpeg_started" from="ffmpeg funcs" to="." method="_on_ffmpeg_funcs_ffmpeg_started"]

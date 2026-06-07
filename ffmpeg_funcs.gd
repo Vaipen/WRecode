@@ -102,7 +102,10 @@ func compress_video_by_size(target_size_mb: float):
 	await ffmpeg_finished
 	_run_ffmpeg(input_path.get_basename() + "_compressed.mp4", ["-c:v", "libx264", "-b:v", str(v_kbps)+"k", "-pass", "2", "-passlogfile", log_file, "-c:a", "aac", "-b:a", "128k"], input_path)
 	await ffmpeg_finished
-	DirAccess.remove_absolute(log_file + "-0.log"); DirAccess.remove_absolute(log_file + "-0.log.mbtree")
+	var _dir = DirAccess.open("user://")
+	if _dir:
+		_dir.remove(log_file + "-0.log")
+		_dir.remove(log_file + "-0.log.mbtree")
 
 # --- Audio ---
 func convert_audio(format: String):

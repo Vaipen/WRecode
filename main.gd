@@ -18,15 +18,40 @@ var file_types = {
 	'audio': ["mp3", "wav", "flac", "aac", "ogg"]
 }
 
+var config = ConfigFile.new()
+var config_path = "user://settings.cfg"
+@onready var notify_checkbox: CheckBox = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete
+
 func _ready() -> void:
+	DisplayServer.window_set_size(Vector2i(812,612))
 	m3progressbar.modulate = Color.TRANSPARENT
 	
-	# Получаем именно пользовательские аргументы
-	var args = OS.get_cmdline_user_args()
-	if args.size() > 0:
-		# Windows иногда передает пути со слешами \, меняем их на godot-style /
-		var file_path_arg = args[0].replace("\\", "/").strip_edges()
-		_update_inputfile(file_path_arg)
+	# Загружаем настройки и подключаем сигнал
+	load_settings()
+	notify_checkbox.toggled.connect(func(toggled_on: bool): save_settings())
+	
+	# Получаем ВСЕ аргументы
+	var args = OS.get_cmdline_args()
+	# Ищем путь к файлу среди переданных аргументов.
+	# Когда файл перетаскивают на .bat или отправляют через Send To, он передается без --
+	# Поэтому он попадает в get_cmdline_args(), а не в user_args.
+	for arg in args:
+		var clean_path = arg.replace("\\", "/").strip_edges()
+		# Игнорируем путь самого экзешника и проверяем, существует ли файл
+		if not clean_path.ends_with(".exe") and FileAccess.file_exists(clean_path) and args != null:
+			_update_inputfile(clean_path)
+			break
+
+func save_settings() -> void:
+	config.set_value("Settings", "notify_complete", notify_checkbox.button_pressed)
+	config.save(config_path)
+
+func load_settings() -> void:
+	var err = config.load(config_path)
+	if err == OK:
+		notify_checkbox.button_pressed = config.get_value("Settings", "notify_complete", true)
+	else:
+		save_settings()
 
 func _process(delta: float) -> void:
 	if run:
@@ -40,14 +65,31 @@ func _process(delta: float) -> void:
 func _update_inputfile(path: String) -> void:
 	if path == "":
 		$"MarginContainer/VBoxContainer/Select file".show()
+		$MarginContainer/VBoxContainer/fillemptyspase.show()
 		$MarginContainer/VBoxContainer/SimpleFuncs.hide()
 		return
 	else:
 		$"MarginContainer/VBoxContainer/Select file".hide()
+		$MarginContainer/VBoxContainer/fillemptyspase.hide()
 		$MarginContainer/VBoxContainer/SimpleFuncs.show()
 	file_path = path
 	input_file_path.text = path
 	var ext = path.get_extension().to_lower()
+	
+	# Проверяем, поддерживается ли формат
+	var is_supported = false
+	for category in file_types.values():
+		if ext in category:
+			is_supported = true
+			break
+			
+	if not is_supported:
+		$"MarginContainer/VBoxContainer/not supported".show()
+		$MarginContainer/VBoxContainer/SimpleFuncs.hide()
+		return
+	else:
+		$"MarginContainer/VBoxContainer/not supported".hide()
+		$MarginContainer/VBoxContainer/SimpleFuncs.show()
 	
 	# Ссылки на панели
 	var vid_panel = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs
@@ -81,7 +123,6 @@ func _populate_formats(vid, aud, img):
 	elif img.visible:
 		current_option = img.get_node("Convert/HBoxContainer/Option")
 		formats = file_types['image']
-	
 	if current_option:
 		current_option.clear()
 		for f in formats: current_option.add_item(f)
