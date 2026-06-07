@@ -5,7 +5,6 @@ signal ffmpeg_started
 signal ffmpeg_finished
 
 # --- Настройки ---
-@export var devmode : bool = false
 @onready var main: Control = $".."
 
 # --- Состояние процесса ---
@@ -26,8 +25,8 @@ var eta : float = 0.0
 var formated_eta : String = "00:00:00"
 
 func _ready() -> void:
-	if devmode:
-		exe_dir = "E:/Godot/Projects/WRecode/"
+	if OS.has_feature("editor"):
+		exe_dir = ProjectSettings.globalize_path("res://")
 	else:
 		exe_dir = OS.get_executable_path().get_base_dir()
 	

@@ -1089,7 +1089,6 @@ text = "OK"
 
 [node name="ffmpeg funcs" type="Node" parent="." unique_id=1611590948]
 script = ExtResource("9_4c57u")
-devmode = true
 
 [node name="Sounds" type="Node" parent="." unique_id=1638918672]
 
