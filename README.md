@@ -12,9 +12,9 @@ WRecode wraps the raw power of FFMPEG into a clean, clickable interface. No conf
 
 ## 🚀 The Main Event — Batch Queue Processing
 
-Wanna compress 12 video clips for a Discord group chat or shrink a stack of GoPro files to fit on a flash drive? **Select 'em all, right-click → Send To → WRecode** and boom — they get processed one by one with the exact same settings. No babysitting required.
+Wanna compress 12 video clips for a Discord group chat? **Select 'em all, right-click → Send To → WRecode** and boom — they get processed one by one with the exact same settings. No babysitting required.
 
-A queue counter shows you which file is cooking ("File 3 of 12"), real-time progress with FPS, bitrate, and ETA, and a **Windows toast notification + sound** when the whole batch is done. Set it and forget it.
+A queue counter shows you which file is cooking ("File 3 of 12"), real-time progress with FPS, bitrate, and ETA, and a **sound** when the whole batch is done. Set it and forget it.
 
 ---
 
@@ -70,7 +70,7 @@ Rip the audio track out to MP3 in one click. No video editor needed.
 
 First launch walks you through installing a **Windows SendTo shortcut**. After that:
 
-**Right-click any file → Send To → WRecode**
+**Right-click any file → Send To → WRecode.bat**
 
 That's it. The app opens with your file loaded, ready to go. Select multiple files and they all land in the batch queue automatically.
 
@@ -84,7 +84,7 @@ That's it. The app opens with your file loaded, ready to go. Select multiple fil
 
 - Built in **Godot 4.7**
 - Ships with its own **FFMPEG & FFProbe** — no PATH configuration required
-- Real-time progress bar with that **wavy wobble animation** (yes, it's a shader)
+- Real-time progress bar
 - Live stats: FPS, encoding speed, bitrate, ETA
 - Windows 10/11 only (sorry, Linux enjoyers — the SendTo integration is pure Windows)
 
@@ -100,8 +100,6 @@ If this tool saves you time, buys you a coffee, or just makes you smile:
   </a>
 </p>
 
-https://dalink.to/waipek
-
 ---
 
 # WRecode — Русская версия
@@ -110,15 +108,15 @@ https://dalink.to/waipek
   <img width="2607" height="512" alt="Full" src="https://github.com/user-attachments/assets/331c5f1d-d5a2-4e7d-8223-124a639e4643" />
 </p>
 
-**Простая и злая FFMPEG обёртка** для тех, кто не хочет дрочить терминал.
+**Простая FFMPEG обёртка** для тех, кто не хочет дрочить терминал.
 
-WRecode даёт тебе всю мощь FFMPEG в чистом, понятном интерфейсе. Никаких конфигов, никаких цепочек аргументов — выбрал файл, ткнул кнопку, поехали.
+WRecode даёт тебе всю мощь FFMPEG в чистом, понятном интерфейсе. Никаких конфигов, никаких цепочек аргументов — выбрал файл, ткнул кнопку, и погнал.
 
 ---
 
 ## 🚀 Главная фишка — Очередь
 
-Надо сжать 12 видосов для Discord? Или упихать кучу GoPro-файлов на флешку? **Выдели их все → правой кнопкой → Отправить → WRecode** — и они обработаются один за другим с одними и теми же настройками. Сиди и смотри, как прогресс-бар волнуется.
+Надо сжать 12 видосов для Discord? **Выдели их все → правой кнопкой → Отправить → WRecode** — и они обработаются один за другим с одними и теми же настройками.
 
 Счётчик показывает "Файл 3 из 12", в реальном времени видно FPS, битрейт, ETA, а когда всё готово — **Windows-уведомление + звук**. Воткнул и забыл.
 
@@ -131,7 +129,7 @@ WRecode даёт тебе всю мощь FFMPEG в чистом, понятно
 
 Никаких «ну, попробуй 50 мегов… а нет, 74 получилось». Одна цифра — готово.
 
-Алгоритм смотрит на длину видео, разрешение и FPS, после чего считает **идеальное разрешение** (800 пикселей на 1 kbps при 30fps). Короткие ролики остаются чёткими. Длинные — плавно снижают разрешение. Математика рулит.
+Алгоритм смотрит на длину видео, разрешение и FPS, после чего считает **идеальное разрешение** (800 пикселей на 1 kbps при 30fps). Короткие ролики остаются чёткими. Длинные — плавно снижают разрешение.
 
 ### 📐 Изменить разрешение
 - `1280:720` — точный размер
@@ -174,9 +172,9 @@ MP4, AVI, MOV, MKV, FLV, WMV — выбрал, конвертнул. Stream copy
 
 ## 📦 SendTo
 
-При первом запуске устанавливается пункт в **контекстное меню «Отправить»**. Всё.
+При первом запуске устанавливается пункт в **контекстное меню «Отправить в»**. Всё.
 
-**Правой кнопкой по файлу → Отправить → WRecode**
+**Правой кнопкой по файлу → Отправить в→ WRecode.bat**
 
 Программа открывается с твоим файлом, готовым к обработке. Выбрал несколько — все попадают в очередь.
 
@@ -190,8 +188,8 @@ MP4, AVI, MOV, MKV, FLV, WMV — выбрал, конвертнул. Stream copy
 
 - Сделано на **Godot 4.7**
 - Внутри **FFMPEG + FFProbe** — ничего ставить не надо
-- Живой прогресс-бар с **волнистой анимацией** (да, это шейдер)
-- FPS, скорость кодирования, битрейт, ETA — всё на экране
+- Прогресс-бар в реальном времени
+- FPS, скорость кодирования, битрейт, Ориентировочное время завершения — всё на экране
 - Только Windows 10/11 (SendTo — чисто виндовое колдунство)
 
 ---
@@ -205,5 +203,3 @@ MP4, AVI, MOV, MKV, FLV, WMV — выбрал, конвертнул. Stream copy
     <img src="https://img.shields.io/badge/Support%20me-ff69b4?style=for-the-badge" alt="Support me" />
   </a>
 </p>
-
-https://dalink.to/waipek
