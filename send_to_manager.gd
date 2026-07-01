@@ -31,7 +31,7 @@ func install() -> void:
 	var bat_content := (
         "@echo off\r\n"
 		+ "chcp 1251 > nul\r\n"
-		+ "\"" + _exe_path + "\" %1\r\n"
+		+ "\"" + _exe_path + "\" %*\r\n"
 	)
 
 	var file := FileAccess.open(_bat_path, FileAccess.WRITE)

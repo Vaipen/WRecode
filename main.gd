@@ -7,9 +7,15 @@ var file_path : String
 @onready var ffmpeg: Node = $"ffmpeg funcs"
 @onready var m3progressbar: Control = $MarginContainer/VBoxContainer/Bottom/Progress/MarginContainer/WavyProgressBar
 @onready var progressinfo: RichTextLabel = $MarginContainer/VBoxContainer/Bottom/Progress/progressinfo
+@onready var queue_label: Label = $MarginContainer/VBoxContainer/Header/QueueLabel
 
 # Состояние работы
 var run : bool = false
+
+# --- Очередь файлов (SendTo) ---
+var file_queue: Array[String] = []   # все файлы для обработки
+var queue_index: int = -1            # индекс текущего файла (-1 = нет очереди)
+var _queue_op: Callable              # хранит операцию для повторения на каждом файле
 
 # Типы файлов для фильтрации интерфейса
 var file_types = {
@@ -30,17 +36,26 @@ func _ready() -> void:
 	load_settings()
 	notify_checkbox.toggled.connect(func(toggled_on: bool): save_settings())
 	
-	# Получаем ВСЕ аргументы
+	# Подключаем сигнал завершения всей операции (для очереди)
+	ffmpeg.operation_done.connect(_on_operation_done)
+	
+	# Получаем ВСЕ аргументы командной строки
 	var args = OS.get_cmdline_args()
-	# Ищем путь к файлу среди переданных аргументов.
-	# Когда файл перетаскивают на .bat или отправляют через Send To, он передается без --
-	# Поэтому он попадает в get_cmdline_args(), а не в user_args.
+	
+	# Собираем все переданные файлы (без break!)
 	for arg in args:
 		var clean_path = arg.replace("\\", "/").strip_edges()
-		# Игнорируем путь самого экзешника и проверяем, существует ли файл
-		if not clean_path.ends_with(".exe") and FileAccess.file_exists(clean_path) and args != null:
-			_update_inputfile(clean_path)
-			break
+		if not clean_path.ends_with(".exe") and FileAccess.file_exists(clean_path):
+			file_queue.append(clean_path)
+	
+	# Показываем первый файл, если есть очередь
+	if not file_queue.is_empty():
+		_update_inputfile(file_queue[0])
+		if file_queue.size() > 1:
+			queue_label.show()
+			_update_queue_label()
+		else:
+			queue_label.hide()
 
 func save_settings() -> void:
 	config.set_value("Settings", "notify_complete", notify_checkbox.button_pressed)
@@ -56,9 +71,53 @@ func load_settings() -> void:
 func _process(delta: float) -> void:
 	if run:
 		m3progressbar.progress = lerp(m3progressbar.progress, ffmpeg.progress/100, delta*5)
-		m3progressbar.wave_speed = lerp(m3progressbar.wave_speed, ffmpeg.fps/80, delta*4)
-		progressinfo.text = "FPS: %d | Bitrate: %s | ETA: %s" % [ffmpeg.fps, ffmpeg.bitrate, ffmpeg.formated_eta]
+		m3progressbar.wave_speed = lerp(m3progressbar.wave_speed, ffmpeg.fps/-30, delta*4)
+		if queue_index >= 0:
+			progressinfo.text = "Файл %d/%d | FPS: %d | Bitrate: %s | ETA: %s" % [queue_index + 1, file_queue.size(), ffmpeg.fps, ffmpeg.bitrate, ffmpeg.formated_eta]
+		else:
+			progressinfo.text = "FPS: %d | Bitrate: %s | ETA: %s" % [ffmpeg.fps, ffmpeg.bitrate, ffmpeg.formated_eta]
 		DisplayServer.window_set_title("WRecode - %d%%" % int(ffmpeg.progress))
+
+# --- ОЧЕРЕДЬ ---
+
+func _start_queue(op: Callable) -> void:
+	_queue_op = op
+	if file_queue.size() <= 1:
+		# Всего один файл — просто выполняем операцию
+		op.call()
+		return
+	
+	# Несколько файлов — начинаем последовательную обработку с первого
+	queue_index = 0
+	_queue_op.call()  # обрабатываем первый файл (уже показан в UI)
+
+func _process_next_in_queue() -> void:
+	queue_index += 1
+	if queue_index >= file_queue.size():
+		_finish_queue()
+		return
+	
+	# Загружаем следующий файл
+	file_path = file_queue[queue_index]
+	_update_inputfile(file_path)
+	_update_queue_label()
+	
+	# Запускаем ту же операцию на новом файле
+	_queue_op.call()
+
+func _finish_queue() -> void:
+	queue_index = -1
+	file_queue.clear()
+	_queue_op = Callable()
+	queue_label.hide()
+	progressinfo.text = "[tornado radius=1 freq=-2]WRecode"
+	DisplayServer.window_set_title("WRecode")
+	_show_notification("WRecode", "Все файлы обработаны!")
+	if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
+		$Sounds/Finish.play()
+
+func _update_queue_label() -> void:
+	queue_label.text = "Файл %d из %d" % [queue_index + 1, file_queue.size()]
 
 # --- ЛОГИКА ВЫБОРА ФАЙЛА ---
 
@@ -139,51 +198,66 @@ func _on_ffmpeg_funcs_ffmpeg_finished():
 	run = false
 	create_tween().tween_property(m3progressbar, "modulate", Color(1,1,1,0), 1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SPRING)
 	$Background.material.set("shader_parameter/u_speed", 0.2)
+	# Внимание: очередь двигается по operation_done, а не по ffmpeg_finished!
+	# Это нужно чтобы multi-pass операции (compress) не прерывались после 1-го прохода.
+
+func _on_operation_done() -> void:
+	# Сигнал operation_done — вся операция над текущим файлом завершена
 	progressinfo.text = "[tornado radius=1 freq=-2]WRecode"
 	DisplayServer.window_set_title("WRecode")
-	if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
-		$Sounds/Finish.play()
-
-
-
-
+	
+	if queue_index >= 0:
+		# Режим очереди — переходим к следующему файлу
+		_process_next_in_queue()
+	else:
+		# Одиночный файл — играем звук завершения
+		if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
+			$Sounds/Finish.play()
 
 func _select_file_pressed(): $MarginContainer/VBoxContainer/Header/FilePath/FileDialog.show()
-func _on_file_selected(path: String): _update_inputfile(path)
+func _on_file_selected(path: String):
+	# Ручной выбор файла — сбрасываем очередь
+	file_queue.clear()
+	queue_index = -1
+	queue_label.hide()
+	_update_inputfile(path)
+	
 func _on_settings_pressed(): $MarginContainer/VBoxContainer/Bottom/Settings/Window.show()
 func _on_options_close_requested(): $MarginContainer/VBoxContainer/Bottom/Settings/Window.hide()
 
-func _show_notification(title, msg):
+func _show_notification(title: String, msg: String) -> void:
 	var args = ["-Command", "Add-Type -AssemblyName System.Windows.Forms; $i=[System.Drawing.SystemIcons]::Information; $n=New-Object System.Windows.Forms.NotifyIcon; $n.Icon=$i; $n.BalloonTipTitle='%s'; $n.BalloonTipText='%s'; $n.Visible=$true; $n.ShowBalloonTip(5000);" % [title, msg]]
 	OS.execute("powershell", args)
 
 
+# --- ОБРАБОТЧИКИ ДЕЙСТВИЙ (с поддержкой очереди) ---
+
 func _on_convert_pressed() -> void:
 	var fmt = convert_format_option.get_item_text(convert_format_option.selected)
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.convert_video(fmt)
+		_start_queue(func(): ffmpeg.convert_video(fmt))
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible: 
-		ffmpeg.convert_audio(fmt)
+		_start_queue(func(): ffmpeg.convert_audio(fmt))
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
-		ffmpeg.convert_image(fmt)
+		_start_queue(func(): ffmpeg.convert_image(fmt))
 
 
 func _on_compress_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Compress/HBoxContainer/Option.text.strip_edges()
 		if val == "" or float(val) <= 0: return
-		ffmpeg.compress_video_by_size(float(val))
+		_start_queue(func(): ffmpeg.compress_video_by_size(float(val)))
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Compress/HBoxContainer/Option.text.strip_edges()
 		if val == "" or float(val) <= 0: return
-		ffmpeg.compress_image(float(val))
+		_start_queue(func(): ffmpeg.compress_image(float(val)))
 
 
 func _on_editfps_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/EditFPS/HBoxContainer/Option.text.strip_edges()
 		if val == "": return
-		ffmpeg.change_fps(val)
+		_start_queue(func(): ffmpeg.change_fps(val))
 
 
 
@@ -191,40 +265,40 @@ func _on_resize_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Resize/HBoxContainer/Option.text.strip_edges()
 		if val == "": return
-		ffmpeg.resize_video(val)
+		_start_queue(func(): ffmpeg.resize_video(val))
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs.visible:
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/ImageFuncs/Resize/HBoxContainer/Option.text.strip_edges()
 		if val == "": return
-		ffmpeg.resize_image(val)
+		_start_queue(func(): ffmpeg.resize_image(val))
 
 
 
 func _on_audioextract_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
-		ffmpeg.extract_audio()
+		_start_queue(func(): ffmpeg.extract_audio())
 
 
 func _on_changebitrate_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible:
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChangeBitrate/HBoxContainer/Option.text.strip_edges()
 		if val == "": return
-		ffmpeg.change_bitrate(val)
+		_start_queue(func(): ffmpeg.change_bitrate(val))
 	elif $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible:
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/ChangeBitrate/HBoxContainer/Option.text.strip_edges()
 		if val == "": return
-		ffmpeg.change_audio_bitrate(val)
+		_start_queue(func(): ffmpeg.change_audio_bitrate(val))
 
 
 func _on_changeaudiobitrate_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs.visible: 
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/ChnageABitrate/HBoxContainer/Option.text.strip_edges()
 		if val == "": return
-		ffmpeg.change_audio_bitrate_in_video(val)
+		_start_queue(func(): ffmpeg.change_audio_bitrate_in_video(val))
 
 
 func _on_samplerate_pressed() -> void:
 	if $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs.visible:
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/EditSampleRate/HBoxContainer/Option.text.strip_edges()
 		if val == "": return
-		ffmpeg.change_audio_samplerate(val)
+		_start_queue(func(): ffmpeg.change_audio_samplerate(val))
 	

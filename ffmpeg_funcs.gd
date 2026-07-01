@@ -3,6 +3,7 @@ extends Node
 # --- Сигналы ---
 signal ffmpeg_started
 signal ffmpeg_finished
+signal operation_done            # весь процесс над файлом завершён (все проходы)
 
 # --- Настройки ---
 @onready var main: Control = $".."
@@ -23,6 +24,9 @@ var bitrate : String = "0"
 var current_time : float = 0.0
 var eta : float = 0.0
 var formated_eta : String = "00:00:00"
+
+# --- Управление сигналами ---
+var _suppress_op_done: bool = false   # подавление operation_done (для multi-pass операций)
 
 func _ready() -> void:
 	if OS.has_feature("editor"):
@@ -55,6 +59,9 @@ func _run_ffmpeg(output_path: String, custom_args: Array, input_path: String = m
 		ffmpeg_stdout = pipe["stdio"]
 	else:
 		ffmpeg_finished.emit()
+		var should_emit_op = not _suppress_op_done
+		if should_emit_op:
+			operation_done.emit()
 
 func _reset_stats():
 	progress = 0.0; fps = 0.0; speed = 0.0; current_time = 0.0; formated_eta = "00:00:00"
@@ -79,7 +86,10 @@ func _parse_line(line: String) -> void:
 
 func _finalize_process() -> void:
 	ffmpeg_pid = -1; ffmpeg_stdout = null; progress = 100.0
+	var should_emit_op = not _suppress_op_done
 	ffmpeg_finished.emit()
+	if should_emit_op:
+		operation_done.emit()
 
 # --- Video ---
 func convert_video(format: String): _run_ffmpeg(main.file_path.get_basename() + "." + format, ["-c", "copy"])
@@ -156,7 +166,8 @@ func compress_video_by_size(target_size_mb: float):
 	var log_file = input_path.get_basename() + "_2pass"
 	var scale_filter := "scale=%d:%d" % [new_w, new_h]
 	
-	# 1-й проход (без звука, только для анализа)
+	# 1-й проход (без звука, только для анализа) — подавляем operation_done
+	_suppress_op_done = true
 	_run_ffmpeg("NUL", [
 		"-c:v", "libx264", "-b:v", str(int(v_kbps)) + "k",
 		"-vf", scale_filter,
@@ -165,7 +176,8 @@ func compress_video_by_size(target_size_mb: float):
 	], input_path)
 	await ffmpeg_finished
 	
-	# 2-й проход (финальный, со звуком)
+	# 2-й проход (финальный, со звуком) — теперь operation_done сработает
+	_suppress_op_done = false
 	_run_ffmpeg(input_path.get_basename() + "_compressed.mp4", [
 		"-c:v", "libx264", "-b:v", str(int(v_kbps)) + "k",
 		"-vf", scale_filter,

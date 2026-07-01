@@ -373,6 +373,12 @@ file_mode = 0
 access = 2
 use_native_dialog = true
 
+[node name="QueueLabel" type="Label" parent="MarginContainer/VBoxContainer/Header" unique_id=99999901]
+visible = false
+modulate = Color(1, 1, 1, 0.6)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1831580324]
 layout_mode = 2
 
