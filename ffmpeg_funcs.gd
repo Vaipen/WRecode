@@ -116,15 +116,65 @@ func resize_video(size: String):
 
 func compress_video_by_size(target_size_mb: float):
 	var input_path = main.file_path
-	target_size_mb-=0.15
-	var duration = get_duration_seconds(input_path)
-	if duration <= 0: return
-	var v_kbps = int((target_size_mb * 8192.0) / duration) - 128
+	target_size_mb -= 0.15  # резерв под аудио
+	if target_size_mb <= 0:
+		return
+	
+	var duration := get_duration_seconds(input_path)
+	if duration <= 0:
+		return
+	
+	var res := get_video_resolution(input_path)
+	if res.width <= 0 or res.height <= 0:
+		printerr("compress_video_by_size: не удалось получить разрешение видео")
+		return
+	
+	var fps := get_video_fps(input_path)
+	
+	# Общий доступный битрейт (kbps)
+	var total_kbps := (target_size_mb * 8192.0) / duration
+	var audio_kbps := 128.0
+	var v_kbps := total_kbps - audio_kbps
+	if v_kbps <= 0:
+		return
+	
+	# Оптимальное разрешение: 800 пикселей на 1 kbps при 30fps (h.264 норм качество)
+	# C поправкой на реальный FPS
+	var pixels_per_kbps := 800.0 * 30.0 / fps
+	var target_pixels := v_kbps * pixels_per_kbps
+	var orig_pixels = res.width * res.height
+	
+	var scale_factor := sqrt(target_pixels / orig_pixels)
+	scale_factor = clamp(scale_factor, 0.25, 1.0)
+	
+	var new_w := int(res.width * scale_factor)
+	var new_h := int(res.height * scale_factor)
+	# Чётность для кодеков
+	if new_w % 2 != 0: new_w += 1
+	if new_h % 2 != 0: new_h += 1
+	
 	var log_file = input_path.get_basename() + "_2pass"
-	_run_ffmpeg("NUL", ["-c:v", "libx264", "-b:v", str(v_kbps)+"k", "-pass", "1", "-passlogfile", log_file, "-an", "-f", "mp4"], input_path)
+	var scale_filter := "scale=%d:%d" % [new_w, new_h]
+	
+	# 1-й проход (без звука, только для анализа)
+	_run_ffmpeg("NUL", [
+		"-c:v", "libx264", "-b:v", str(int(v_kbps)) + "k",
+		"-vf", scale_filter,
+		"-pass", "1", "-passlogfile", log_file,
+		"-an", "-f", "mp4"
+	], input_path)
 	await ffmpeg_finished
-	_run_ffmpeg(input_path.get_basename() + "_compressed.mp4", ["-c:v", "libx264", "-b:v", str(v_kbps)+"k", "-pass", "2", "-passlogfile", log_file, "-c:a", "aac", "-b:a", "128k"], input_path)
+	
+	# 2-й проход (финальный, со звуком)
+	_run_ffmpeg(input_path.get_basename() + "_compressed.mp4", [
+		"-c:v", "libx264", "-b:v", str(int(v_kbps)) + "k",
+		"-vf", scale_filter,
+		"-pass", "2", "-passlogfile", log_file,
+		"-c:a", "aac", "-b:a", "128k"
+	], input_path)
 	await ffmpeg_finished
+	
+	# Очистка логов двухпроходного кодирования
 	var _dir = DirAccess.open("user://")
 	if _dir:
 		_dir.remove(log_file + "-0.log")
@@ -172,6 +222,27 @@ func get_video_resolution(path: String) -> Dictionary:
 		if parts.size() >= 2:
 			return {"width": parts[0].to_int(), "height": parts[1].to_int()}
 	return {"width": 0, "height": 0}
+
+func get_video_fps(path: String) -> float:
+	# Возвращает FPS видео через ffprobe (r_frame_rate)
+	var output: Array[String] = []
+	var code := OS.execute(ffprobe_path, [
+		"-v", "error",
+		"-select_streams", "v:0",
+		"-show_entries", "stream=r_frame_rate",
+		"-of", "default=noprint_wrappers=1:nokey=1",
+		path
+	], output, true)
+	if code == 0 and not output.is_empty():
+		var parts := output[0].strip_edges().split("/")
+		if parts.size() == 2:
+			var num := parts[0].to_float()
+			var den := parts[1].to_float()
+			if den > 0:
+				return num / den
+		elif parts.size() == 1 and parts[0].to_float() > 0:
+			return parts[0].to_float()
+	return 30.0  # fallback
 
 func get_duration_seconds(path: String) -> float:
 	var output = []
