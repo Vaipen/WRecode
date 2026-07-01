@@ -73,7 +73,7 @@ func _process(delta: float) -> void:
 		m3progressbar.progress = lerp(m3progressbar.progress, ffmpeg.progress/100, delta*5)
 		m3progressbar.wave_speed = lerp(m3progressbar.wave_speed, ffmpeg.fps/-30, delta*4)
 		if queue_index >= 0:
-			progressinfo.text = "Файл %d/%d | FPS: %d | Bitrate: %s | ETA: %s" % [queue_index + 1, file_queue.size(), ffmpeg.fps, ffmpeg.bitrate, ffmpeg.formated_eta]
+			progressinfo.text = "File %d/%d | FPS: %d | Bitrate: %s | ETA: %s" % [queue_index + 1, file_queue.size(), ffmpeg.fps, ffmpeg.bitrate, ffmpeg.formated_eta]
 		else:
 			progressinfo.text = "FPS: %d | Bitrate: %s | ETA: %s" % [ffmpeg.fps, ffmpeg.bitrate, ffmpeg.formated_eta]
 		DisplayServer.window_set_title("WRecode - %d%%" % int(ffmpeg.progress))
@@ -112,12 +112,12 @@ func _finish_queue() -> void:
 	queue_label.hide()
 	progressinfo.text = "[tornado radius=1 freq=-2]WRecode"
 	DisplayServer.window_set_title("WRecode")
-	_show_notification("WRecode", "Все файлы обработаны!")
+	#_show_notification("WRecode", "Все файлы обработаны!")
 	if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
 		$Sounds/Finish.play()
 
 func _update_queue_label() -> void:
-	queue_label.text = "Файл %d из %d" % [queue_index + 1, file_queue.size()]
+	queue_label.text = "File %d of %d" % [queue_index + 1, file_queue.size()]
 
 # --- ЛОГИКА ВЫБОРА ФАЙЛА ---
 
