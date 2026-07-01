@@ -397,16 +397,15 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="fillemptyspase" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=375835338]
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="SimpleFuncs" type="PanelContainer" parent="MarginContainer/VBoxContainer" unique_id=1088961410]
-visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="VideoFuncs" type="VBoxContainer" parent="MarginContainer/VBoxContainer/SimpleFuncs" unique_id=1066129389]
-visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -523,13 +522,13 @@ icon = ExtResource("9_vivmo")
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 30
-placeholder_text = "e.g 1920:1080"
+placeholder_text = "XxY or X:Y"
 emoji_menu_enabled = false
 virtual_keyboard_type = 2
 
 [node name="FAQ" type="Button" parent="MarginContainer/VBoxContainer/SimpleFuncs/VideoFuncs/Resize/HBoxContainer" unique_id=1660311819]
 layout_mode = 2
-tooltip_text = "Enter the size e.g 1920:1080"
+tooltip_text = "Enter the size (e.g., 1920x1080) or type \"x3\" — the video size will then be reduced by a factor of 3."
 disabled = true
 text = "?"
 

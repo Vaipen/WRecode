@@ -87,7 +87,31 @@ func change_fps(fps_val: String): _run_ffmpeg(main.file_path.get_basename() + "_
 func extract_audio(): _run_ffmpeg(main.file_path.get_basename() + ".mp3", ["-vn"])
 func change_bitrate(kbps: String): _run_ffmpeg(main.file_path.get_basename() + "_" + kbps + "k." + main.file_path.get_extension(), ["-b:v", kbps + "k"])
 func change_audio_bitrate_in_video(kbps: String): _run_ffmpeg(main.file_path.get_basename() + "_a" + kbps + "k." + main.file_path.get_extension(), ["-c:v", "copy", "-b:a", kbps + "k"])
-func resize_video(size: String): _run_ffmpeg(main.file_path.get_basename() + "_" + str(size.replace(":","x")) + "." + main.file_path.get_extension(), ["-vf", "scale="+size])
+func resize_video(size: String):
+	var scale_filter: String
+	var suffix: String = size.replace(":", "x")
+	
+	if size.begins_with("x"):
+		# Уменьшение в N раз: x2 → половина, x3 → треть и т.д.
+		var factor = size.substr(1).to_float()
+		if factor <= 0:
+			return
+		var res = get_video_resolution(main.file_path)
+		if res.width <= 0 or res.height <= 0:
+			printerr("resize_video: не удалось получить разрешение исходного видео")
+			return
+		# Вычисляем новое разрешение
+		var new_w := int(res.width / factor)
+		var new_h := int(res.height / factor)
+		# Многие кодеки требуют чётные ширину/высоту
+		if new_w % 2 != 0: new_w += 1
+		if new_h % 2 != 0: new_h += 1
+		scale_filter = "scale=%d:%d" % [new_w, new_h]
+		suffix = size
+	else:
+		scale_filter = "scale=" + size
+	
+	_run_ffmpeg(main.file_path.get_basename() + "_" + suffix + "." + main.file_path.get_extension(), ["-vf", scale_filter])
 
 
 func compress_video_by_size(target_size_mb: float):
@@ -133,6 +157,22 @@ func compress_image(target_size_mb: float):
 	_run_ffmpeg(out_path, ["-q:v", str(estimated_q)])
 	
 # --- Utils ---
+func get_video_resolution(path: String) -> Dictionary:
+	# Возвращает {width: N, height: N} исходного видео через ffprobe
+	var output: Array[String] = []
+	var code := OS.execute(ffprobe_path, [
+		"-v", "error",
+		"-select_streams", "v:0",
+		"-show_entries", "stream=width,height",
+		"-of", "csv=p=0",
+		path
+	], output, true)
+	if code == 0 and not output.is_empty():
+		var parts := output[0].strip_edges().split(",")
+		if parts.size() >= 2:
+			return {"width": parts[0].to_int(), "height": parts[1].to_int()}
+	return {"width": 0, "height": 0}
+
 func get_duration_seconds(path: String) -> float:
 	var output = []
 	var code = OS.execute(ffprobe_path, ["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", path], output, true)

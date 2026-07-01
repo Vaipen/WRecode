@@ -56,7 +56,7 @@ func load_settings() -> void:
 func _process(delta: float) -> void:
 	if run:
 		m3progressbar.progress = lerp(m3progressbar.progress, ffmpeg.progress/100, delta*5)
-		m3progressbar.wave_speed = lerp(m3progressbar.wave_speed, ffmpeg.fps/100, delta*4)
+		m3progressbar.wave_speed = lerp(m3progressbar.wave_speed, ffmpeg.fps/80, delta*4)
 		progressinfo.text = "FPS: %d | Bitrate: %s | ETA: %s" % [ffmpeg.fps, ffmpeg.bitrate, ffmpeg.formated_eta]
 		DisplayServer.window_set_title("WRecode - %d%%" % int(ffmpeg.progress))
 
