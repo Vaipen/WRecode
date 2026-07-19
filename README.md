@@ -18,7 +18,7 @@ A queue counter shows you which file is cooking ("File 3 of 12"), real-time prog
 
 ---
 
-## ⚡ GPU-Accelerated Encoding (v1.1+)
+## ⚡ GPU-Accelerated Encoding (v1.2+)
 
 WRecode now taps into your graphics card for **hardware-accelerated encoding** — zero CLI tweaking required.
 
@@ -148,7 +148,7 @@ WRecode даёт тебе всю мощь FFMPEG в чистом, понятно
 
 ---
 
-## ⚡ GPU-ускорение (v1.1+)
+## ⚡ GPU-ускорение (v1.2+)
 
 WRecode теперь использует твою видеокарту для **аппаратного кодирования** — ничего настраивать не надо.
 
