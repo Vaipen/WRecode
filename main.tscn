@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://78e6lxx8puvw"]
 
 [ext_resource type="Theme" uid="uid://bp7665k4n8m6y" path="res://theme.tres" id="1_5vw27"]
-[ext_resource type="Script" uid="uid://x0eq5slua18f" path="res://main.gd" id="2_kek77"]
+[ext_resource type="Script" uid="uid://bmvm1cwlw057d" path="res://main.gd" id="2_kek77"]
 [ext_resource type="FontFile" uid="uid://dixajpvoymgfu" path="res://fonts/Inter/static/Inter_28pt-Black.ttf" id="3_kek77"]
 [ext_resource type="Script" uid="uid://dujpkwobstyka" path="res://theme_manager.gd" id="3_w48qg"]
 [ext_resource type="Texture2D" uid="uid://0dt3n4vayuub" path="res://ui/icons/input_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="4_dg77c"]
@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://omaj78edswis" path="res://ui/icons/photo_size_select_large_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="6_w48qg"]
 [ext_resource type="Texture2D" uid="uid://dqae3t2mqp05" path="res://ui/icons/30fps_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="7_vivmo"]
 [ext_resource type="Texture2D" uid="uid://bpo7hbi0osmam" path="res://ui/icons/audio_file_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="8_2cqfq"]
-[ext_resource type="Script" uid="uid://gbe4swybcoqx" path="res://ffmpeg_funcs.gd" id="9_4c57u"]
+[ext_resource type="Script" uid="uid://cxj0tg2lft2pd" path="res://ffmpeg_funcs.gd" id="9_4c57u"]
 [ext_resource type="Texture2D" uid="uid://86as33wusg6m" path="res://ui/icons/arrows_output_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="9_vivmo"]
 [ext_resource type="Texture2D" uid="uid://de1fyc4roknvy" path="res://ui/icons/10k_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="9_yaehf"]
 [ext_resource type="Texture2D" uid="uid://cdw66c3jj7a4n" path="res://ui/icons/movie_speaker_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="10_074og"]
@@ -826,8 +826,7 @@ disable_3d = true
 oversampling_override = 1.0
 title = "Options"
 initial_position = 1
-size = Vector2i(400, 500)
-visible = false
+size = Vector2i(500, 600)
 unresizable = true
 always_on_top = true
 minimize_disabled = true
@@ -878,6 +877,24 @@ text = "System window style"
 
 [node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=257478286]
 visible = false
+layout_mode = 2
+
+[node name="GPUCheck" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=2100000001]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+disabled = true
+text = "Use GPU Acceleration"
+
+[node name="GPUInfo" type="RichTextLabel" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=2100000002]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "No compatible GPU detected.
+GPU encoding is not available."
+fit_content = true
+scroll_active = false
+
+[node name="HSeparatorGPU" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=2100000003]
 layout_mode = 2
 
 [node name="NOTIFYWHENcomplete" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=1159361977]

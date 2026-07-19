@@ -4,6 +4,7 @@ extends Node
 signal ffmpeg_started
 signal ffmpeg_finished
 signal operation_done            # весь процесс над файлом завершён (все проходы)
+signal gpu_detected(vendor: int, name: String)  # GPU найден: vendor (0=None,1=NVIDIA,2=AMD,3=Intel), name
 
 # --- Настройки ---
 @onready var main: Control = $".."
@@ -27,6 +28,12 @@ var formated_eta : String = "00:00:00"
 
 # --- Управление сигналами ---
 var _suppress_op_done: bool = false   # подавление operation_done (для multi-pass операций)
+
+# --- GPU Acceleration ---
+enum GPU { NONE, NVIDIA, AMD, INTEL }
+var detected_gpu: GPU = GPU.NONE
+var gpu_name: String = ""
+var use_gpu: bool = false
 
 func _ready() -> void:
 	if OS.has_feature("editor"):
@@ -91,12 +98,111 @@ func _finalize_process() -> void:
 	if should_emit_op:
 		operation_done.emit()
 
+# --- GPU Detection ---
+
+func detect_gpu() -> void:
+	var output: Array[String] = []
+	var code := OS.execute("powershell", [
+		"-Command",
+		"Get-CimInstance Win32_VideoController | Select-Object Name, AdapterCompatibility, AdapterRAM | ConvertTo-Json"
+	], output, true)
+	
+	if code != 0 or output.is_empty():
+		gpu_detected.emit(GPU.NONE, "")
+		return
+	
+	var json_str := ""
+	for line in output:
+		json_str += line
+	
+	var json = JSON.parse_string(json_str)
+	if json == null:
+		gpu_detected.emit(GPU.NONE, "")
+		return
+	
+	var gpus: Array = json if json is Array else [json]
+	
+	var best_ram: int = -1
+	var best_priority: int = 99
+	
+	for g in gpus:
+		var gpu_dev_name: String = g.get("Name", "")
+		var ram: int = int(g.get("AdapterRAM", 0))
+		var upper := gpu_dev_name.to_upper()
+		
+		var gpu_type := GPU.NONE
+		var priority := 99
+		
+		if "NVIDIA" in upper or "GEFORCE" in upper or "QUADRO" in upper or "RTX" in upper:
+			gpu_type = GPU.NVIDIA; priority = 1
+		elif "AMD" in upper or "RADEON" in upper:
+			gpu_type = GPU.AMD; priority = 2
+		elif "INTEL" in upper or "UHD" in upper or "IRIS" in upper or "ARC" in upper:
+			gpu_type = GPU.INTEL; priority = 3
+		
+		if gpu_type != GPU.NONE and priority < best_priority:
+			best_priority = priority
+			best_ram = ram
+			detected_gpu = gpu_type
+			gpu_name = gpu_dev_name
+		elif gpu_type != GPU.NONE and priority == best_priority and ram > best_ram:
+			# Same vendor tier — pick the one with more VRAM (likely dGPU vs iGPU)
+			best_ram = ram
+			gpu_name = gpu_dev_name
+	
+	gpu_detected.emit(detected_gpu, gpu_name)
+
+func get_hw_encoder() -> String:
+	match detected_gpu:
+		GPU.NVIDIA: return "h264_nvenc"
+		GPU.AMD: return "h264_amf"
+		GPU.INTEL: return "h264_qsv"
+	return "libx264"
+
+func get_hw_encoder_params() -> Array:
+	match detected_gpu:
+		GPU.NVIDIA: return ["-preset", "p4", "-tune", "hq"]
+		GPU.AMD: return ["-quality", "quality"]
+		GPU.INTEL: return ["-preset", "medium"]
+	return []
+
+func _build_video_encode_args(base_args: Array) -> Array:
+	"""Prepends hardware encoder args if GPU acceleration is enabled."""
+	if use_gpu and detected_gpu != GPU.NONE:
+		var hw_args: Array = ["-c:v", get_hw_encoder()]
+		hw_args.append_array(get_hw_encoder_params())
+		hw_args.append_array(base_args)
+		return hw_args
+	return base_args
+
 # --- Video ---
-func convert_video(format: String): _run_ffmpeg(main.file_path.get_basename() + "." + format, ["-c", "copy"])
-func change_fps(fps_val: String): _run_ffmpeg(main.file_path.get_basename() + "_" + fps_val + "fps." + main.file_path.get_extension(), ["-vf", "fps=" + fps_val])
-func extract_audio(): _run_ffmpeg(main.file_path.get_basename() + ".mp3", ["-vn"])
-func change_bitrate(kbps: String): _run_ffmpeg(main.file_path.get_basename() + "_" + kbps + "k." + main.file_path.get_extension(), ["-b:v", kbps + "k"])
-func change_audio_bitrate_in_video(kbps: String): _run_ffmpeg(main.file_path.get_basename() + "_a" + kbps + "k." + main.file_path.get_extension(), ["-c:v", "copy", "-b:a", kbps + "k"])
+
+func convert_video(format: String):
+	_run_ffmpeg(main.file_path.get_basename() + "." + format, ["-c", "copy"])
+
+func change_fps(fps_val: String):
+	var args := _build_video_encode_args(["-vf", "fps=" + fps_val])
+	_run_ffmpeg(
+		main.file_path.get_basename() + "_" + fps_val + "fps." + main.file_path.get_extension(),
+		args
+	)
+
+func extract_audio():
+	_run_ffmpeg(main.file_path.get_basename() + ".mp3", ["-vn"])
+
+func change_bitrate(kbps: String):
+	var args := _build_video_encode_args(["-b:v", kbps + "k"])
+	_run_ffmpeg(
+		main.file_path.get_basename() + "_" + kbps + "k." + main.file_path.get_extension(),
+		args
+	)
+
+func change_audio_bitrate_in_video(kbps: String):
+	_run_ffmpeg(
+		main.file_path.get_basename() + "_a" + kbps + "k." + main.file_path.get_extension(),
+		["-c:v", "copy", "-b:a", kbps + "k"]
+	)
+
 func resize_video(size: String):
 	var scale_filter: String
 	var suffix: String = size.replace(":", "x")
@@ -110,10 +216,8 @@ func resize_video(size: String):
 		if res.width <= 0 or res.height <= 0:
 			printerr("resize_video: не удалось получить разрешение исходного видео")
 			return
-		# Вычисляем новое разрешение
 		var new_w := int(res.width / factor)
 		var new_h := int(res.height / factor)
-		# Многие кодеки требуют чётные ширину/высоту
 		if new_w % 2 != 0: new_w += 1
 		if new_h % 2 != 0: new_h += 1
 		scale_filter = "scale=%d:%d" % [new_w, new_h]
@@ -121,7 +225,11 @@ func resize_video(size: String):
 	else:
 		scale_filter = "scale=" + size
 	
-	_run_ffmpeg(main.file_path.get_basename() + "_" + suffix + "." + main.file_path.get_extension(), ["-vf", scale_filter])
+	var args := _build_video_encode_args(["-vf", scale_filter])
+	_run_ffmpeg(
+		main.file_path.get_basename() + "_" + suffix + "." + main.file_path.get_extension(),
+		args
+	)
 
 
 func compress_video_by_size(target_size_mb: float):
@@ -139,7 +247,7 @@ func compress_video_by_size(target_size_mb: float):
 		printerr("compress_video_by_size: не удалось получить разрешение видео")
 		return
 	
-	var fps := get_video_fps(input_path)
+	var fps_val := get_video_fps(input_path)
 	
 	# Общий доступный битрейт (kbps)
 	var total_kbps := (target_size_mb * 8192.0) / duration
@@ -148,23 +256,36 @@ func compress_video_by_size(target_size_mb: float):
 	if v_kbps <= 0:
 		return
 	
-	# Оптимальное разрешение: 800 пикселей на 1 kbps при 30fps (h.264 норм качество)
-	# C поправкой на реальный FPS
-	var pixels_per_kbps := 800.0 * 30.0 / fps
+	# Оптимальное разрешение: 400 пикселей на 1 kbps при 30fps (баланс: выше разрешение, ниже битрейт)
+	var pixels_per_kbps := 400.0 * 30.0 / fps_val
 	var target_pixels := v_kbps * pixels_per_kbps
 	var orig_pixels = res.width * res.height
 	
 	var scale_factor := sqrt(target_pixels / orig_pixels)
-	scale_factor = clamp(scale_factor, 0.25, 1.0)
+	scale_factor = clamp(scale_factor, 0.4, 1.0)
 	
 	var new_w := int(res.width * scale_factor)
 	var new_h := int(res.height * scale_factor)
-	# Чётность для кодеков
 	if new_w % 2 != 0: new_w += 1
 	if new_h % 2 != 0: new_h += 1
 	
-	var log_file = input_path.get_basename() + "_2pass"
 	var scale_filter := "scale=%d:%d" % [new_w, new_h]
+	
+	# --- GPU Path: single-pass constrained VBR (maxrate guarantees target size) ---
+	if use_gpu and detected_gpu != GPU.NONE:
+		var out_path: String = input_path.get_basename() + "_compressed.mp4"
+		_run_ffmpeg(out_path, [
+			"-c:v", get_hw_encoder(),
+			"-b:v", str(int(v_kbps)) + "k",
+			"-maxrate", str(int(v_kbps)) + "k",
+			"-bufsize", str(int(v_kbps * 2)) + "k",
+			"-vf", scale_filter,
+			"-c:a", "aac", "-b:a", "128k"
+		], input_path)
+		return
+	
+	# --- CPU Path: classic 2-pass libx264 ---
+	var log_file = input_path.get_basename() + "_2pass"
 	
 	# 1-й проход (без звука, только для анализа) — подавляем operation_done
 	_suppress_op_done = true
@@ -210,8 +331,6 @@ func compress_image(target_size_mb: float):
 	var file = FileAccess.open(main.file_path, FileAccess.READ)
 	var current_size_mb = float(file.get_length()) / (1024.0 * 1024.0)
 	
-	# Считаем примерный уровень сжатия (q:v). 
-	# Чем больше разница в размере, тем больше цифра q:v
 	var ratio = current_size_mb / target_size_mb
 	var estimated_q = clamp(int(ratio * 5.0), 2, 31) 
 	
@@ -220,23 +339,44 @@ func compress_image(target_size_mb: float):
 	
 # --- Utils ---
 func get_video_resolution(path: String) -> Dictionary:
-	# Возвращает {width: N, height: N} исходного видео через ffprobe
+	# Returns DISPLAY resolution (accounts for rotation metadata).
+	# Phone-recorded vertical videos often have coded 1920x1080 + rotation=90° → display 1080x1920.
 	var output: Array[String] = []
 	var code := OS.execute(ffprobe_path, [
 		"-v", "error",
 		"-select_streams", "v:0",
-		"-show_entries", "stream=width,height",
-		"-of", "csv=p=0",
+		"-show_entries", "stream",
+		"-of", "json",
 		path
 	], output, true)
 	if code == 0 and not output.is_empty():
-		var parts := output[0].strip_edges().split(",")
-		if parts.size() >= 2:
-			return {"width": parts[0].to_int(), "height": parts[1].to_int()}
+		var json_str := ""
+		for line in output:
+			json_str += line
+		var json: Variant = JSON.parse_string(json_str)
+		if json != null and json is Dictionary and "streams" in json and json["streams"].size() > 0:
+			var stream: Dictionary = json["streams"][0]
+			var w: int = stream.get("width", 0)
+			var h: int = stream.get("height", 0)
+			# Rotation from tags (common for phone videos)
+			var tags: Dictionary = stream.get("tags", {})
+			var rotation: int = int(tags.get("rotate", "0"))
+			# Rotation from side_data_list (Display Matrix, newer container format)
+			if rotation == 0:
+				var side_data_list: Array = stream.get("side_data_list", [])
+				for sd: Variant in side_data_list:
+					if sd is Dictionary and sd.get("side_data_type", "") == "Display Matrix":
+						rotation = int(sd.get("rotation", 0))
+						break
+			# Swap for 90° / 270° rotation
+			if rotation in [90, -90, 270, -270]:
+				var tmp: int = w
+				w = h
+				h = tmp
+			return {"width": w, "height": h}
 	return {"width": 0, "height": 0}
 
 func get_video_fps(path: String) -> float:
-	# Возвращает FPS видео через ffprobe (r_frame_rate)
 	var output: Array[String] = []
 	var code := OS.execute(ffprobe_path, [
 		"-v", "error",

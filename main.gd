@@ -26,7 +26,11 @@ var file_types = {
 
 var config = ConfigFile.new()
 var config_path = "user://settings.cfg"
+
+# --- UI references for settings ---
 @onready var notify_checkbox: CheckBox = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete
+@onready var gpu_checkbox: CheckBox = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GPUCheck
+@onready var gpu_info: RichTextLabel = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GPUInfo
 
 func _ready() -> void:
 	DisplayServer.window_set_size(Vector2i(812,612))
@@ -34,10 +38,18 @@ func _ready() -> void:
 	
 	# Загружаем настройки и подключаем сигнал
 	load_settings()
-	notify_checkbox.toggled.connect(func(toggled_on: bool): save_settings())
+	notify_checkbox.toggled.connect(func(_toggled_on: bool): save_settings())
+	gpu_checkbox.toggled.connect(func(toggled_on: bool):
+		ffmpeg.use_gpu = toggled_on
+		save_settings()
+	)
 	
 	# Подключаем сигнал завершения всей операции (для очереди)
 	ffmpeg.operation_done.connect(_on_operation_done)
+	
+	# Подключаем сигнал обнаружения GPU и запускаем детекцию
+	ffmpeg.gpu_detected.connect(_on_gpu_detected)
+	ffmpeg.detect_gpu()
 	
 	# Получаем ВСЕ аргументы командной строки
 	var args = OS.get_cmdline_args()
@@ -59,14 +71,67 @@ func _ready() -> void:
 
 func save_settings() -> void:
 	config.set_value("Settings", "notify_complete", notify_checkbox.button_pressed)
+	config.set_value("Settings", "use_gpu", gpu_checkbox.button_pressed)
+	ffmpeg.use_gpu = gpu_checkbox.button_pressed
 	config.save(config_path)
 
 func load_settings() -> void:
 	var err = config.load(config_path)
 	if err == OK:
 		notify_checkbox.button_pressed = config.get_value("Settings", "notify_complete", true)
+		gpu_checkbox.button_pressed = config.get_value("Settings", "use_gpu", false)
 	else:
 		save_settings()
+	ffmpeg.use_gpu = gpu_checkbox.button_pressed
+
+func _on_gpu_detected(vendor: int, gpu_name: String) -> void:
+	match vendor:
+		1: # NVIDIA
+			gpu_checkbox.disabled = false
+			gpu_checkbox.text = "Use GPU Acceleration (NVIDIA)"
+			gpu_info.text = "[color=#aaaaaa]Detected: %s ✓[/color]
+[color=#e94f37]⚠[/color] GPU encoding may produce slightly lower quality
+   at the same bitrate compared to software (libx264).
+
+[color=#e94f37]⚠[/color] Some output formats do not support hardware
+   encoding — will automatically fall back to software.
+
+[color=#e94f37]⚠[/color] When compressing to a target size, single-pass
+   VBR is used — file size is guaranteed, but quality
+   distribution may be slightly less optimal.[/color]" % gpu_name
+		2: # AMD
+			gpu_checkbox.disabled = false
+			gpu_checkbox.text = "Use GPU Acceleration (AMD)"
+			gpu_info.text = "[color=#aaaaaa]Detected: %s ✓[/color]
+[color=#e94f37]⚠[/color] GPU encoding may produce slightly lower quality
+   at the same bitrate compared to software (libx264).
+
+[color=#e94f37]⚠[/color] Some output formats do not support hardware
+   encoding — will automatically fall back to software.
+
+[color=#e94f37]⚠[/color] When compressing to a target size, single-pass
+   VBR is used — file size is guaranteed, but quality
+   distribution may be slightly less optimal.[/color]" % gpu_name
+		3: # Intel
+			gpu_checkbox.disabled = false
+			gpu_checkbox.text = "Use GPU Acceleration (Intel)"
+			gpu_info.text = "[color=#aaaaaa]Detected: %s ✓[/color]
+[color=#e94f37]⚠[/color] GPU encoding may produce slightly lower quality
+   at the same bitrate compared to software (libx264).
+
+[color=#e94f37]⚠[/color] Some output formats do not support hardware
+   encoding — will automatically fall back to software.
+
+[color=#e94f37]⚠[/color] When compressing to a target size, single-pass
+   VBR is used — file size is guaranteed, but quality
+   distribution may be slightly less optimal.[/color]" % gpu_name
+		_: # None
+			gpu_checkbox.disabled = true
+			gpu_checkbox.button_pressed = false
+			gpu_checkbox.text = "Use GPU Acceleration"
+			gpu_info.text = "[color=#888888]No compatible GPU detected.[/color]
+[color=#666666]GPU encoding is not available.[/color]
+[color=#666666]Supported: NVIDIA (NVENC), AMD (AMF), Intel (QuickSync).[/color]"
 
 func _process(delta: float) -> void:
 	if run:
@@ -198,8 +263,6 @@ func _on_ffmpeg_funcs_ffmpeg_finished():
 	run = false
 	create_tween().tween_property(m3progressbar, "modulate", Color(1,1,1,0), 1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SPRING)
 	$Background.material.set("shader_parameter/u_speed", 0.2)
-	# Внимание: очередь двигается по operation_done, а не по ffmpeg_finished!
-	# Это нужно чтобы multi-pass операции (compress) не прерывались после 1-го прохода.
 
 func _on_operation_done() -> void:
 	# Сигнал operation_done — вся операция над текущим файлом завершена
@@ -301,4 +364,3 @@ func _on_samplerate_pressed() -> void:
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/EditSampleRate/HBoxContainer/Option.text.strip_edges()
 		if val == "": return
 		_start_queue(func(): ffmpeg.change_audio_samplerate(val))
-	
