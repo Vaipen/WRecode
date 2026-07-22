@@ -8,6 +8,8 @@ var file_path : String
 @onready var m3progressbar: Control = $MarginContainer/VBoxContainer/Bottom/Progress/MarginContainer/WavyProgressBar
 @onready var progressinfo: RichTextLabel = $MarginContainer/VBoxContainer/Bottom/Progress/progressinfo
 @onready var queue_label: Label = $MarginContainer/VBoxContainer/Header/QueueLabel
+@onready var pixels_per_kbps_slider: HSlider = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings/HBoxContainer/pixels_per_kbps
+@onready var min_scale_factor_slider: HSlider = $"MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings/HBoxContainer2/min scale_factor"
 
 # Состояние работы
 var run : bool = false
@@ -28,9 +30,9 @@ var config = ConfigFile.new()
 var config_path = "user://settings.cfg"
 
 # --- UI references for settings ---
-@onready var notify_checkbox: CheckBox = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete
-@onready var gpu_checkbox: CheckBox = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GPUCheck
-@onready var gpu_info: RichTextLabel = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/GPUInfo
+@onready var notify_checkbox: CheckBox = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/NOTIFYWHENcomplete
+@onready var gpu_checkbox: CheckBox = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/GPUCheck
+@onready var gpu_info: RichTextLabel = $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/GPUInfo
 
 func _ready() -> void:
 	DisplayServer.window_set_size(Vector2i(812,612))
@@ -50,6 +52,13 @@ func _ready() -> void:
 	# Подключаем сигнал обнаружения GPU и запускаем детекцию
 	ffmpeg.gpu_detected.connect(_on_gpu_detected)
 	ffmpeg.detect_gpu()
+	
+	# Подключаем слайдеры CompressionSettings к ffmpeg
+	pixels_per_kbps_slider.value_changed.connect(_on_compression_setting_changed)
+	min_scale_factor_slider.value_changed.connect(_on_compression_setting_changed)
+	
+	# Применяем начальные значения из конфига (после load_settings)
+	_update_ffmpeg_compression_settings()
 	
 	# Получаем ВСЕ аргументы командной строки
 	var args = OS.get_cmdline_args()
@@ -72,7 +81,11 @@ func _ready() -> void:
 func save_settings() -> void:
 	config.set_value("Settings", "notify_complete", notify_checkbox.button_pressed)
 	config.set_value("Settings", "use_gpu", gpu_checkbox.button_pressed)
+	config.set_value("Settings", "pixels_per_kbps", pixels_per_kbps_slider.value)
+	config.set_value("Settings", "min_scale_factor", min_scale_factor_slider.value)
 	ffmpeg.use_gpu = gpu_checkbox.button_pressed
+	ffmpeg.pixels_per_kbps = pixels_per_kbps_slider.value
+	ffmpeg.min_scale_factor = min_scale_factor_slider.value
 	config.save(config_path)
 
 func load_settings() -> void:
@@ -80,9 +93,21 @@ func load_settings() -> void:
 	if err == OK:
 		notify_checkbox.button_pressed = config.get_value("Settings", "notify_complete", true)
 		gpu_checkbox.button_pressed = config.get_value("Settings", "use_gpu", false)
+		pixels_per_kbps_slider.value = config.get_value("Settings", "pixels_per_kbps", 800.0)
+		min_scale_factor_slider.value = config.get_value("Settings", "min_scale_factor", 0.5)
 	else:
 		save_settings()
 	ffmpeg.use_gpu = gpu_checkbox.button_pressed
+
+# --- Compression Settings ---
+
+func _update_ffmpeg_compression_settings() -> void:
+	ffmpeg.pixels_per_kbps = pixels_per_kbps_slider.value
+	ffmpeg.min_scale_factor = min_scale_factor_slider.value
+
+func _on_compression_setting_changed(_new_value: float) -> void:
+	_update_ffmpeg_compression_settings()
+	save_settings()
 
 func _on_gpu_detected(vendor: int, gpu_name: String) -> void:
 	match vendor:
@@ -90,48 +115,36 @@ func _on_gpu_detected(vendor: int, gpu_name: String) -> void:
 			gpu_checkbox.disabled = false
 			gpu_checkbox.text = "Use GPU Acceleration (NVIDIA)"
 			gpu_info.text = "[color=#aaaaaa]Detected: %s ✓[/color]
-[color=#e94f37]⚠[/color] GPU encoding may produce slightly lower quality
-   at the same bitrate compared to software (libx264).
+[color=#e94f37]⚠[/color] GPU encoding may produce slightly lower quality at the same bitrate compared to software (libx264).
 
-[color=#e94f37]⚠[/color] Some output formats do not support hardware
-   encoding — will automatically fall back to software.
+[color=#e94f37]⚠[/color] Some output formats do not support hardware encoding — will automatically fall back to software.
 
-[color=#e94f37]⚠[/color] When compressing to a target size, single-pass
-   VBR is used — file size is guaranteed, but quality
-   distribution may be slightly less optimal.[/color]" % gpu_name
+[color=#e94f37]⚠[/color] When compressing to a target size, single-pass VBR is used — file size is guaranteed, but quality distribution may be slightly less optimal." % gpu_name
 		2: # AMD
 			gpu_checkbox.disabled = false
 			gpu_checkbox.text = "Use GPU Acceleration (AMD)"
 			gpu_info.text = "[color=#aaaaaa]Detected: %s ✓[/color]
-[color=#e94f37]⚠[/color] GPU encoding may produce slightly lower quality
-   at the same bitrate compared to software (libx264).
+[color=#e94f37]⚠[/color] GPU encoding may produce slightly lower quality at the same bitrate compared to software (libx264).
 
-[color=#e94f37]⚠[/color] Some output formats do not support hardware
-   encoding — will automatically fall back to software.
+[color=#e94f37]⚠[/color] Some output formats do not support hardware encoding — will automatically fall back to software.
 
-[color=#e94f37]⚠[/color] When compressing to a target size, single-pass
-   VBR is used — file size is guaranteed, but quality
-   distribution may be slightly less optimal.[/color]" % gpu_name
+[color=#e94f37]⚠[/color] When compressing to a target size, single-pass VBR is used — file size is guaranteed, but quality distribution may be slightly less optimal.[/color]" % gpu_name
 		3: # Intel
 			gpu_checkbox.disabled = false
 			gpu_checkbox.text = "Use GPU Acceleration (Intel)"
 			gpu_info.text = "[color=#aaaaaa]Detected: %s ✓[/color]
-[color=#e94f37]⚠[/color] GPU encoding may produce slightly lower quality
-   at the same bitrate compared to software (libx264).
+[color=#e94f37]⚠[/color] GPU encoding may produce slightly lower quality at the same bitrate compared to software (libx264).
 
-[color=#e94f37]⚠[/color] Some output formats do not support hardware
-   encoding — will automatically fall back to software.
+[color=#e94f37]⚠[/color] Some output formats do not support hardware encoding — will automatically fall back to software.
 
-[color=#e94f37]⚠[/color] When compressing to a target size, single-pass
-   VBR is used — file size is guaranteed, but quality
-   distribution may be slightly less optimal.[/color]" % gpu_name
+[color=#e94f37]⚠[/color] When compressing to a target size, single-pass VBR is used — file size is guaranteed, but quality distribution may be slightly less optimal." % gpu_name
 		_: # None
 			gpu_checkbox.disabled = true
 			gpu_checkbox.button_pressed = false
 			gpu_checkbox.text = "Use GPU Acceleration"
 			gpu_info.text = "[color=#888888]No compatible GPU detected.[/color]
 [color=#666666]GPU encoding is not available.[/color]
-[color=#666666]Supported: NVIDIA (NVENC), AMD (AMF), Intel (QuickSync).[/color]"
+[color=#666666]Supported: NVIDIA (NVENC), AMD (AMF), Intel (QuickSync)."
 
 func _process(delta: float) -> void:
 	if run:
@@ -178,7 +191,7 @@ func _finish_queue() -> void:
 	progressinfo.text = "[tornado radius=1 freq=-2]WRecode"
 	DisplayServer.window_set_title("WRecode")
 	#_show_notification("WRecode", "Все файлы обработаны!")
-	if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
+	if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
 		$Sounds/Finish.play()
 
 func _update_queue_label() -> void:
@@ -274,7 +287,7 @@ func _on_operation_done() -> void:
 		_process_next_in_queue()
 	else:
 		# Одиночный файл — играем звук завершения
-		if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
+		if $MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/NOTIFYWHENcomplete.button_pressed:
 			$Sounds/Finish.play()
 
 func _select_file_pressed(): $MarginContainer/VBoxContainer/Header/FilePath/FileDialog.show()
@@ -364,3 +377,8 @@ func _on_samplerate_pressed() -> void:
 		var val = $MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/EditSampleRate/HBoxContainer/Option.text.strip_edges()
 		if val == "": return
 		_start_queue(func(): ffmpeg.change_audio_samplerate(val))
+
+
+func _on_reset_compressionsettings_pressed() -> void:
+	pixels_per_kbps_slider.value = 1200
+	min_scale_factor_slider.value = 0.5

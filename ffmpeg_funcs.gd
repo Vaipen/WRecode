@@ -35,6 +35,10 @@ var detected_gpu: GPU = GPU.NONE
 var gpu_name: String = ""
 var use_gpu: bool = false
 
+# --- Compression Settings (populated by main.gd) ---
+var pixels_per_kbps: float = 800.0
+var min_scale_factor: float = 0.5
+
 func _ready() -> void:
 	if OS.has_feature("editor"):
 		exe_dir = ProjectSettings.globalize_path("res://")
@@ -257,12 +261,12 @@ func compress_video_by_size(target_size_mb: float):
 		return
 	
 	# Оптимальное разрешение: 400 пикселей на 1 kbps при 30fps (баланс: выше разрешение, ниже битрейт)
-	var pixels_per_kbps := 400.0 * 30.0 / fps_val
-	var target_pixels := v_kbps * pixels_per_kbps
+	var actual_pixels_per_kbps := pixels_per_kbps * 30.0 / fps_val
+	var target_pixels := v_kbps * actual_pixels_per_kbps
 	var orig_pixels = res.width * res.height
 	
 	var scale_factor := sqrt(target_pixels / orig_pixels)
-	scale_factor = clamp(scale_factor, 0.4, 1.0)
+	scale_factor = clamp(scale_factor, min_scale_factor, 1.0)
 	
 	var new_w := int(res.width * scale_factor)
 	var new_h := int(res.height * scale_factor)

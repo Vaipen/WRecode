@@ -29,15 +29,12 @@ config/icon="uid://b4u0h0c5hqn07"
 
 window/size/viewport_width=800
 window/size/viewport_height=600
+window/size/initial_position_type=4
 window/subwindows/embed_subwindows=false
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/per_pixel_transparency/allowed=true
 window/vsync/vsync_mode=0
-
-[editor_plugins]
-
-enabled=PackedStringArray()
 
 [gui]
 

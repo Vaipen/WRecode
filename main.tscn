@@ -14,11 +14,14 @@
 [ext_resource type="Texture2D" uid="uid://de1fyc4roknvy" path="res://ui/icons/10k_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="9_yaehf"]
 [ext_resource type="Texture2D" uid="uid://cdw66c3jj7a4n" path="res://ui/icons/movie_speaker_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="10_074og"]
 [ext_resource type="Texture2D" uid="uid://bslul8khaenh8" path="res://ui/icons/settings_64dp_E3E3E3_FILL0_wght600_GRAD0_opsz48.svg" id="11_cegan"]
+[ext_resource type="Texture2D" uid="uid://dxjdsxv6n6ic1" path="res://pics/Screenshot_1.png" id="14_82xsv"]
+[ext_resource type="FontFile" uid="uid://dui1ku3uixrt6" path="res://fonts/Martian_Mono/static/MartianMono-Light.ttf" id="14_ryguw"]
 [ext_resource type="Shader" uid="uid://ckx0q3lgyu0ks" path="res://shaders/blur.gdshader" id="14_yaehf"]
 [ext_resource type="AudioStream" uid="uid://bc5ofckairiq2" path="res://sounds/Accept.ogg" id="15_vivmo"]
 [ext_resource type="AudioStream" uid="uid://1hnpv64nfktj" path="res://sounds/Tap.ogg" id="16_2cqfq"]
 [ext_resource type="Script" uid="uid://cxp7qekuypcos" path="res://send_to_manager.gd" id="18_074og"]
 [ext_resource type="Texture2D" uid="uid://d117j1e8k1ns7" path="res://pics/Sendto.png" id="19_cegan"]
+[ext_resource type="Script" uid="uid://7r3j8jkknbi8" path="res://ui/compression_preview.gd" id="20_g74ul"]
 
 [sub_resource type="Shader" id="Shader_82xsv"]
 code = "shader_type canvas_item;
@@ -827,6 +830,7 @@ oversampling_override = 1.0
 title = "Options"
 initial_position = 1
 size = Vector2i(500, 600)
+visible = false
 unresizable = true
 always_on_top = true
 minimize_disabled = true
@@ -855,66 +859,130 @@ theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 12
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer" unique_id=1493868669]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer" unique_id=1683441937]
 layout_mode = 2
+size_flags_vertical = 3
+scroll_hint_mode = 2
 
-[node name="DecreaseAudioBitrate" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=229063610]
-visible = false
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer" unique_id=1493868669]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Decrease audio bitrate
-while compress video"
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=121499903]
-visible = false
-layout_mode = 2
-
-[node name="SYSYTEMWINDOWstyle" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=1546441610]
-visible = false
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "System window style"
-
-[node name="HSeparator4" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=257478286]
-visible = false
-layout_mode = 2
-
-[node name="GPUCheck" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=2100000001]
+[node name="GPUCheck" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer" unique_id=2100000001]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 disabled = true
 text = "Use GPU Acceleration"
 
-[node name="GPUInfo" type="RichTextLabel" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=2100000002]
+[node name="GPUInfo" type="RichTextLabel" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer" unique_id=2100000002]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_fonts/normal_font = ExtResource("14_ryguw")
+theme_override_font_sizes/normal_font_size = 16
+theme_override_font_sizes/bold_font_size = 16
+theme_override_font_sizes/bold_italics_font_size = 16
+theme_override_font_sizes/italics_font_size = 16
+theme_override_font_sizes/mono_font_size = 16
 bbcode_enabled = true
 text = "No compatible GPU detected.
 GPU encoding is not available."
 fit_content = true
 scroll_active = false
 
-[node name="HSeparatorGPU" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=2100000003]
+[node name="HSeparatorGPU" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer" unique_id=2100000003]
 layout_mode = 2
 
-[node name="NOTIFYWHENcomplete" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=1159361977]
+[node name="NOTIFYWHENcomplete" type="CheckBox" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer" unique_id=1159361977]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 button_pressed = true
 text = "Notify when complete"
 
-[node name="HSeparator5" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=1942322438]
+[node name="HSeparator5" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer" unique_id=1942322438]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=774123405]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer" unique_id=380863105]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.61, 0.61, 1)
+theme_override_font_sizes/font_size = 16
+text = "Advanced"
+horizontal_alignment = 1
+
+[node name="CompressionSettings" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer" unique_id=107647706]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings" unique_id=82110190]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings/HBoxContainer" unique_id=339719568]
+layout_mode = 2
+text = "Video Bitrate"
+
+[node name="pixels_per_kbps" type="HSlider" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings/HBoxContainer" unique_id=97158089]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 200.0
+max_value = 2000.0
+step = 50.0
+value = 800.0
+scrollable = false
+
+[node name="info2" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings" unique_id=1699698657]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.64705884)
+theme_override_fonts/font = ExtResource("14_ryguw")
+theme_override_font_sizes/font_size = 12
+text = "Higher = full resolution more compression.
+Lower = lower resolution and less compression."
+horizontal_alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings" unique_id=383152047]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings/HBoxContainer2" unique_id=1283726350]
+layout_mode = 2
+text = "Max Downscale"
+
+[node name="min scale_factor" type="HSlider" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings/HBoxContainer2" unique_id=1714305059]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.1
+max_value = 1.0
+step = 0.05
+value = 0.5
+scrollable = false
+
+[node name="info" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings" unique_id=367937456]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.64705884)
+theme_override_fonts/font = ExtResource("14_ryguw")
+theme_override_font_sizes/font_size = 12
+text = "Sets the minimum resolution the video can shrink to.
+1.0 = full resolution always preserved.
+0.5 = won't drop below half resolution."
+horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings" unique_id=743264961]
+layout_mode = 2
+texture = ExtResource("14_82xsv")
+expand_mode = 5
+script = ExtResource("20_g74ul")
+
+[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings" unique_id=1163443342]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Reset to default(optimal)"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer" unique_id=774123405]
 visible = false
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/HBoxContainer" unique_id=702773922]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer" unique_id=702773922]
 layout_mode = 2
 text = "Language"
 
-[node name="OptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1309694471]
+[node name="OptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer" unique_id=1309694471]
 layout_mode = 2
 item_count = 2
 popup/item_0/text = "English"
@@ -922,11 +990,11 @@ popup/item_0/id = 0
 popup/item_1/text = "Русский"
 popup/item_1/id = 1
 
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=654263693]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer" unique_id=654263693]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer" unique_id=1641719712]
+[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer" unique_id=1641719712]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.64332217, 0.47464776, 0.5319018, 1)
 text = "Delete from Send to"
@@ -1141,7 +1209,8 @@ script = ExtResource("18_074og")
 [connection signal="pressed" from="MarginContainer/VBoxContainer/SimpleFuncs/AudioFuncs/ChangeBitrate/HBoxContainer/Function" to="." method="_on_changebitrate_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Bottom/Settings" to="." method="_on_settings_pressed"]
 [connection signal="close_requested" from="MarginContainer/VBoxContainer/Bottom/Settings/Window" to="." method="_on_options_close_requested"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/VBoxContainer/Button" to="SendToManager" method="_on_buttondelete_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/CompressionSettings/Button" to="." method="_on_reset_compressionsettings_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Bottom/Settings/Window/MarginContainer/ScrollContainer/VBoxContainer/Button" to="SendToManager" method="_on_buttondelete_pressed"]
 [connection signal="pressed" from="First Install/SendToNoficator/Panel/MarginContainer/HBoxContainer/Button" to="SendToManager" method="_on_buttoninstall_pressed"]
 [connection signal="pressed" from="First Install/HowTo/Panel/MarginContainer/VBoxContainer/Button" to="SendToManager" method="_on_buttonfinal_pressed"]
 [connection signal="ffmpeg_finished" from="ffmpeg funcs" to="." method="_on_ffmpeg_funcs_ffmpeg_finished"]

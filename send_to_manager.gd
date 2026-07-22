@@ -15,7 +15,6 @@ func _ready() -> void:
 	_bat_path = sendto + "\\" + _exe_name + ".bat"     # WRecodeApp convert.bat
 	
 	if is_installed():
-		print("exist")
 		$"../First Install".queue_free()
 	else:
 		$"../First Install".show()
